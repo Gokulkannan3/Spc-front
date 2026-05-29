@@ -11,8 +11,8 @@ import { FaInfoCircle, FaArrowLeft, FaArrowRight } from "react-icons/fa"
 import Navbar from "../Component/Navbar"
 import "../App.css"
 import { API_BASE_URL } from "../../Config"
-import about from "../cont.jpg"
-import need from "../default.jpg"
+import about from "../spc.jpg"
+import need from "../spc.jpg"
 
 /* ─── Design tokens ─────────────────────────────────────────────────────── */
 const C = {
