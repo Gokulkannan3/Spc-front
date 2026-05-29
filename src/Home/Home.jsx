@@ -405,7 +405,7 @@ export default function Home() {
           <div className="relative rounded-t-2xl overflow-hidden"
             style={{height:"clamp(180px,40vw,520px)",border:`2px solid ${C.borderD}`,borderBottom:"none",boxShadow:`6px 6px 0 ${C.crimson}`}}>
             <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded font-bold text-sm"
-              style={{background:C.crimson,color:"#fff",fontFamily:"'Syne',sans-serif",letterSpacing:"0.1em"}}>MNC</div>
+              style={{background:C.crimson,color:"#fff",fontFamily:"'Syne',sans-serif",letterSpacing:"0.1em"}}>SPC</div>
             <AnimatePresence mode="wait">
               {banners.map((b,i)=>slide===i&&(
                 <motion.div key={b.id} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.9}} className="absolute inset-0">
