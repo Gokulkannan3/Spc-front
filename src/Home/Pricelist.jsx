@@ -13,7 +13,6 @@ import jsPDF from 'jspdf';
 import "../App.css";
 import need from '../spc.jpg';
 
-// ─── Colour Palette ──────────────────────────────────────────────────────────
 const C = {
   ivory:    "#fdf8f0",
   cream:    "#faf3e4",
@@ -29,9 +28,12 @@ const C = {
   borderD:  "#d4c4a0",
   green:    "#2e7d32",
   brand:    "#1565c0",
+  selectedBg: "#f5e9c9",
+  selectedBorder: "#d4a97a",
 };
 
-// ─── GlobalStyles injected once at module level ───────────────────────────────
+const MIN_PURCHASE = 2000;
+
 const GLOBAL_STYLES_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; }
@@ -59,8 +61,36 @@ const GLOBAL_STYLES_CSS = `
   .search-input-group input { width:100%; padding:11px 14px 11px 40px; border:1.5px solid ${C.border}; border-radius:4px; background:#fff; font-family:'Barlow',sans-serif; font-size:14px; color:${C.ink}; outline:none; transition:border-color 0.2s; }
   .search-input-group input:focus { border-color:${C.crimson}; }
   .search-input-group .icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); pointer-events:none; }
-  /* Cart amount banner animation */
-  @keyframes cartBannerPulse { 0%,100% { opacity:1; } 50% { opacity:0.85; } }
+  .product-card-selected { background: ${C.selectedBg} !important; border-color: ${C.selectedBorder} !important; }
+  @keyframes pipelineShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .pipeline-fill {
+    background: linear-gradient(90deg, ${C.crimson} 0%, ${C.saffron} 50%, ${C.crimson} 100%);
+    background-size: 200% auto;
+    animation: pipelineShimmer 2s linear infinite;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pipeline-fill-complete {
+    background: linear-gradient(90deg, ${C.green} 0%, #43a047 50%, ${C.green} 100%);
+    background-size: 200% auto;
+    animation: pipelineShimmer 2s linear infinite;
+  }
+  @media (max-width: 640px) {
+    .mobile\\:text-sm { font-size: 0.875rem !important; }
+    .mobile\\:text-xs { font-size: 0.75rem !important; }
+    .mobile\\:p-3 { padding: 0.75rem !important; }
+    .mobile\\:gap-2 { gap: 0.5rem !important; }
+    .mobile\\:w-full { width: 100% !important; }
+    .mobile\\:flex-col { flex-direction: column !important; }
+    .mobile\\:hidden { display: none !important; }
+    .mobile\\:rounded-t-xl { border-radius: 1rem 1rem 0 0 !important; }
+    .mobile\\:max-h-screen { max-height: 100vh !important; }
+    .mobile\\:bottom-0 { bottom: 0 !important; }
+    .mobile\\:px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .mobile\\:py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+  }
 `;
 
 if (typeof document !== "undefined" && !document.getElementById("pricelist-styles")) {
@@ -70,7 +100,6 @@ if (typeof document !== "undefined" && !document.getElementById("pricelist-style
   document.head.appendChild(styleEl);
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatPercentage = (v) => Math.round(Number.parseFloat(v)).toString();
 const formatPrice = (price) => {
   const n = Number.parseFloat(price);
@@ -89,7 +118,90 @@ const ORDERED_TYPES = [
   "Matches","Guns and Caps","Sparklers","Premium Sparklers","Gift Boxes","Kids Special ",
 ];
 
-// ─── Memoized ProductCard ─────────────────────────────────────────────────────
+const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
+  const progress = Math.min((subtotalRaw / MIN_PURCHASE) * 100, 100);
+  const remaining = Math.max(0, MIN_PURCHASE - subtotalRaw);
+
+  return (
+    <motion.div
+      initial={{ y: -64, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 340, damping: 30 }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 55,
+        background: isUnlocked
+          ? `linear-gradient(90deg, #1b5e20 0%, ${C.green} 100%)`
+          : `linear-gradient(90deg, ${C.ink} 0%, #3a3a42 100%)`,
+        color: "#fff",
+        padding: "0.45rem 1.25rem 0.55rem",
+        boxShadow: "0 2px 16px rgba(0,0,0,0.22)",
+        cursor: isUnlocked ? "pointer" : "default",
+        transition: "background 0.5s ease",
+      }}
+      onClick={isUnlocked ? onCartOpen : undefined}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.3rem", gap: 12}}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {isUnlocked ? (
+            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "18px", letterSpacing: "0.03em" }}>
+              🎉 Cart!
+            </span>
+          ) : (
+            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: "18px" }}>
+              Add ₹{formatPrice(remaining)} more to open cart
+            </span>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "14px" }}>
+            ₹{formatPrice(subtotalRaw)}
+            <span style={{ fontSize: "10px", fontWeight: 500, opacity: 0.7 }}> / ₹{MIN_PURCHASE}</span>
+          </span>
+          {isUnlocked && (
+            <span style={{
+              background: "rgba(255,255,255,0.2)", borderRadius: "4px",
+              padding: "2px 10px", fontSize: "12px", fontFamily: "'Barlow', sans-serif",
+              fontWeight: 700,
+            }}>View Cart →</span>
+          )}
+        </div>
+      </div>
+      <div style={{
+        height: 6,
+        background: "rgba(255,255,255,0.18)",
+        borderRadius: 100,
+        overflow: "hidden",
+        position: "relative",
+      }}>
+        <div
+          className={isUnlocked ? "pipeline-fill pipeline-fill-complete" : "pipeline-fill"}
+          style={{
+            height: "100%",
+            width: `${progress}%`,
+            borderRadius: 100,
+          }}
+        />
+        {!isUnlocked && (
+          <div style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            height: "100%",
+            width: `${100 - progress}%`,
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: "0 100px 100px 0",
+          }} />
+        )}
+      </div>
+    </motion.div>
+  );
+});
+MinPurchasePipeline.displayName = "MinPurchasePipeline";
+
 const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onImageClick }) => {
   const originalPrice = Number.parseFloat(product.price);
   const discount = originalPrice * (product.discount / 100);
@@ -104,13 +216,20 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
     [product.images]
   );
 
+  const isSelected = count > 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      className={isSelected ? "product-card-selected" : ""}
       style={{
-        background: "#fff", border: `1px solid ${C.border}`,
-        borderRadius: "8px", overflow: "hidden", transition: "all 0.28s ease",
+        background: isSelected ? C.selectedBg : "#fff",
+        border: `1px solid ${isSelected ? C.selectedBorder : C.border}`,
+        borderRadius: "8px",
+        overflow: "hidden",
+        transition: "all 0.28s ease",
+        boxShadow: isSelected ? `3px 3px 0 ${C.selectedBorder}` : "none",
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = C.crimson;
@@ -118,15 +237,25 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
         e.currentTarget.style.boxShadow = `6px 6px 0 ${C.crimson}`;
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = C.border;
+        e.currentTarget.style.borderColor = isSelected ? C.selectedBorder : C.border;
         e.currentTarget.style.transform = "";
-        e.currentTarget.style.boxShadow = "";
+        e.currentTarget.style.boxShadow = isSelected ? `3px 3px 0 ${C.selectedBorder}` : "";
       }}
     >
       <div style={{ position: "relative" }}>
         <ModernCarousel media={product.images} onImageClick={() => onImageClick(product.images)} />
         <div style={{ position: "absolute", top: 10, left: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
           {product.discount > 0 && <span className="pill">{formatPercentage(product.discount)}% OFF</span>}
+          {isSelected && (
+            <motion.span
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="pill pill-green"
+              style={{ fontSize: "9px", padding: "3px 8px" }}
+            >
+              ✓ In Cart
+            </motion.span>
+          )}
         </div>
         <button
           onClick={() => onShowDetails(product)}
@@ -140,7 +269,7 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
           <FaInfoCircle style={{ color: C.crimson, fontSize: 13 }} />
         </button>
       </div>
-      <div style={{ padding: "1rem" }}>
+      <div style={{ padding: "1rem", background: isSelected ? C.selectedBg : "transparent", transition: "background 0.3s" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
           <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", color: C.muted, letterSpacing: "0.1em" }}>
             {product.serial_number}
@@ -166,47 +295,48 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
           <span className="display" style={{ fontSize: "1.25rem", color: C.crimson }}>₹{finalPrice}</span>
           <span style={{ fontSize: "11px", color: C.muted }}>/{product.per}</span>
         </div>
-        <AnimatePresence mode="wait">
-          {count > 0 ? (
-            <motion.div key="qty" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                background: C.crimson, borderRadius: "4px", padding: 4,
-              }}>
-              <button onClick={() => onRemove(product)} style={{
-                width: 28, height: 28, background: "rgba(255,255,255,0.2)",
-                border: "none", borderRadius: "2px", color: "#fff",
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <FaMinus style={{ fontSize: 9 }} />
-              </button>
-              <span style={{
-                color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800,
-                fontSize: "14px", minWidth: "2rem", textAlign: "center",
-              }}>{count}</span>
-              <button onClick={() => onAdd(product)} style={{
-                width: 28, height: 28, background: "rgba(255,255,255,0.2)",
-                border: "none", borderRadius: "2px", color: "#fff",
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <FaPlus style={{ fontSize: 9 }} />
-              </button>
-            </motion.div>
-          ) : (
-            <motion.button key="add" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
-              onClick={() => onAdd(product)} className="btn-outline"
-              style={{ width: "100%", justifyContent: "center", padding: "8px", fontSize: "12px" }}>
-              <FaPlus style={{ fontSize: 9 }} /> Add
-            </motion.button>
-          )}
-        </AnimatePresence>
+        <div className="flex justify-end">
+          <AnimatePresence mode="wait" style={{display: "flex", justifyContent: "end"}}>
+            {count > 0 ? (
+              <motion.div key="qty" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  background: C.crimson, borderRadius: "4px", padding: 4,
+                }} className="w-42 flex justify-end">
+                <button onClick={() => onRemove(product)} style={{
+                  width: 28, height: 28, background: "rgba(255,255,255,0.2)",
+                  border: "none", borderRadius: "2px", color: "#fff",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <FaMinus style={{ fontSize: 9 }} />
+                </button>
+                <span style={{
+                  color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800,
+                  fontSize: "14px", minWidth: "2rem", textAlign: "center",
+                }}>{count}</span>
+                <button onClick={() => onAdd(product)} style={{
+                  width: 28, height: 28, background: "rgba(255,255,255,0.2)",
+                  border: "none", borderRadius: "2px", color: "#fff",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <FaPlus style={{ fontSize: 9 }} />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.button key="add" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
+                onClick={() => onAdd(product)} className="btn-outline"
+                style={{justifyContent: "center", padding: "8px", fontSize: "12px",width:'50%' }}>
+                <FaPlus style={{ fontSize: 9 }} /> Add
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </motion.div>
   );
 });
 ProductCard.displayName = "ProductCard";
 
-// ─── Lucky Spin Modal ─────────────────────────────────────────────────────────
 const SPIN_COLORS = [
   C.crimson, C.saffron, "#2e7d32", "#1565c0",
   C.crimsonD, "#6a1b9a", "#00838f", "#bf360c",
@@ -368,7 +498,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
                 background: "rgba(46,125,50,0.08)", border: "1.5px solid rgba(46,125,50,0.3)",
                 borderRadius: "6px", color: C.green,
                 fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "12px",
-              }}>✅ Only 1 free product per order is allowed</div>
+              }}>Only 1 free product per order is allowed</div>
             )}
           </div>
           {!alreadyHasFree && (
@@ -449,73 +579,6 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
 });
 LuckySpinModal.displayName = "LuckySpinModal";
 
-// ─── TOP CART AMOUNT BANNER ───────────────────────────────────────────────────
-// Shows live cart total while products are being added; hides when cart is empty.
-const CartAmountBanner = memo(({ cartItemCount, cartTotal, onOpenCart }) => {
-  if (cartItemCount === 0) return null;
-  const overThreshold = parseFloat(cartTotal) > 3000;
-  return (
-    <AnimatePresence>
-      <motion.div
-        key="cart-banner"
-        initial={{ y: -60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -60, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 340, damping: 30 }}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 55,
-          background: overThreshold
-            ? `linear-gradient(90deg, ${C.green} 0%, #1b5e20 100%)`
-            : `linear-gradient(90deg, ${C.crimson} 0%, ${C.crimsonD} 100%)`,
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0.5rem 1.5rem",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
-          cursor: "pointer",
-          gap: 12,
-        }}
-        onClick={onOpenCart}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <ShoppingCart style={{ width: 16, height: 16, flexShrink: 0 }} />
-          <span style={{
-            fontWeight: 700, fontSize: "18px", letterSpacing: "0.02em",
-          }}>
-            {cartItemCount} item{cartItemCount !== 1 ? "s" : ""}
-          </span>
-          {overThreshold && (
-            <span style={{
-              background: "rgba(255,255,255,0.22)", borderRadius: "100px",
-              padding: "2px 10px", fontSize: "10px", fontFamily: "'Barlow', sans-serif",
-              fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-            }}>🎁 Eligible for Lucky Spin!</span>
-          )}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{
-            fontWeight: 800, fontSize: "20px",
-          }}>
-            ₹{cartTotal}
-          </span>
-          <span style={{
-            background: "rgba(255,255,255,0.2)", borderRadius: "4px",
-            padding: "3px 10px", fontSize: "20px", fontFamily: "'Barlow', sans-serif",
-            fontWeight: 600, letterSpacing: "0.08em",
-          }}>View Cart →</span>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
-});
-CartAmountBanner.displayName = "CartAmountBanner";
-
-// ─── Main Pricelist Component ─────────────────────────────────────────────────
 const Pricelist = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
@@ -527,7 +590,6 @@ const Pricelist = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showMinOrderModal, setShowMinOrderModal] = useState(false);
   const [minOrderMessage, setMinOrderMessage] = useState("");
-  // showToaster: true = show the "bill downloaded" toast after successful booking
   const [showToaster, setShowToaster] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isBookingLoading, setIsBookingLoading] = useState(false);
@@ -537,12 +599,10 @@ const Pricelist = () => {
   });
   const [selectedType, setSelectedType] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
-
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [brandSearchInput, setBrandSearchInput] = useState("");
   const [brandSearchTerm, setBrandSearchTerm] = useState("");
-
   const [promocode, setPromocode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [states, setStates] = useState([]);
@@ -565,7 +625,6 @@ const Pricelist = () => {
   });
   const [suggestedCart, setSuggestedCart] = useState({});
 
-  // ── Debounced search handlers ─────────────────────────────────────────────
   const handleSearchInputChange = useCallback((e) => {
     const val = e.target.value;
     setSearchInput(val);
@@ -581,13 +640,8 @@ const Pricelist = () => {
     brandDebounce.current = setTimeout(() => setBrandSearchTerm(val), 220);
   }, []);
 
-  const clearSearch = useCallback(() => {
-    setSearchInput(""); setSearchTerm("");
-  }, []);
-
-  const clearBrandSearch = useCallback(() => {
-    setBrandSearchInput(""); setBrandSearchTerm("");
-  }, []);
+  const clearSearch = useCallback(() => { setSearchInput(""); setSearchTerm(""); }, []);
+  const clearBrandSearch = useCallback(() => { setBrandSearchInput(""); setBrandSearchTerm(""); }, []);
 
   const showError = useCallback((message) => {
     setMinOrderMessage(message);
@@ -595,7 +649,6 @@ const Pricelist = () => {
     setTimeout(() => setShowMinOrderModal(false), 5000);
   }, []);
 
-  // ── Detect free products ──────────────────────────────────────────────────
   const freeProductsList = useMemo(
     () => products.filter(p =>
       (typeof p.status === "string" && p.status.toLowerCase() === "free") ||
@@ -604,14 +657,12 @@ const Pricelist = () => {
     [products]
   );
 
-  // ── Extract unique brands ─────────────────────────────────────────────────
   const brandList = useMemo(() => {
     const brands = new Set();
     products.forEach(p => { if (p.brand && p.brand.trim()) brands.add(p.brand.trim()); });
     return ["All", ...Array.from(brands).sort()];
   }, [products]);
 
-  // ── PDF Download ──────────────────────────────────────────────────────────
   const downloadPDF = useCallback(async () => {
     if (!products.length) return;
     const doc = new jsPDF();
@@ -712,7 +763,6 @@ const Pricelist = () => {
     doc.save('MNC_Pricelist_2025.pdf');
   }, [products]);
 
-  // ── Init ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const initializeData = async () => {
       setIsLoading(true);
@@ -764,7 +814,6 @@ const Pricelist = () => {
   useEffect(() => { localStorage.setItem("firecracker-cart", JSON.stringify(cart)); }, [cart]);
   useEffect(() => { localStorage.setItem("firecracker-free-cart", JSON.stringify(freeCartItem)); }, [freeCartItem]);
 
-  // ── Promo validation from local state (no API re-fetch on each keystroke) ──
   const handleApplyPromo = useCallback((code) => {
     if (!code) { setAppliedPromo(null); return; }
     const found = promocodes.find(p => p.code.toLowerCase() === code.toLowerCase());
@@ -784,7 +833,6 @@ const Pricelist = () => {
     return () => clearTimeout(promoDebounce.current);
   }, [promocode, handleApplyPromo]);
 
-  // ── Cart operations ───────────────────────────────────────────────────────
   const addToCart = useCallback((product) => {
     if (!product?.serial_number) return;
     if (typeof product.status === "string" && product.status.toLowerCase() === "free") return;
@@ -815,7 +863,6 @@ const Pricelist = () => {
 
   const removeFreeItem = useCallback(() => setFreeCartItem(null), []);
 
-  // ── Suggested cart ────────────────────────────────────────────────────────
   const addToSuggestedCart = useCallback((product) => {
     if (!product?.serial_number) return;
     setSuggestedCart(prev => ({ ...prev, [product.serial_number]: (prev[product.serial_number] || 0) + 1 }));
@@ -832,7 +879,6 @@ const Pricelist = () => {
     });
   }, []);
 
-  // ── AI suggestions ────────────────────────────────────────────────────────
   const generateSuggestions = useCallback(() => {
     const budget = Number(aiBudget);
     if (!budget || budget <= 0) { showError("Please enter a valid budget"); return; }
@@ -927,7 +973,6 @@ const Pricelist = () => {
     setSuggestedCart({});
   }, [suggestedCart]);
 
-  // ── Totals (derived; no extra state) ──────────────────────────────────────
   const totals = useMemo(() => {
     let net = 0, productDiscount = 0, subtotal = 0, promoDiscount = 0;
     for (const serial in cart) {
@@ -956,21 +1001,25 @@ const Pricelist = () => {
       processing_fee: formatPrice(fee),
       originalTotal: subtotal,
       totalDiscount: productDiscount,
-      subtotalRaw: subtotal, // raw number used for spin threshold check
+      subtotalRaw: subtotal,
     };
   }, [cart, products, appliedPromo]);
 
-  // ── Checkout flow ─────────────────────────────────────────────────────────
-  // Only show the Lucky Spin if cart subtotal exceeds ₹3000
+  const isCartUnlocked = totals.subtotalRaw >= MIN_PURCHASE;
+
   const handleCheckoutClick = useCallback(() => {
     if (!Object.keys(cart).length) { showError("Your cart is empty."); return; }
+    if (!isCartUnlocked) {
+      showError(`Minimum purchase is ₹${MIN_PURCHASE}. Add ₹${formatPrice(MIN_PURCHASE - totals.subtotalRaw)} more to proceed.`);
+      return;
+    }
     setIsCartOpen(false);
     if (totals.subtotalRaw > 3000) {
       setShowSpinModal(true);
     } else {
       setShowModal(true);
     }
-  }, [cart, totals.subtotalRaw, showError]);
+  }, [cart, totals.subtotalRaw, isCartUnlocked, showError]);
 
   const handleSpinSkip = useCallback(() => {
     setShowSpinModal(false);
@@ -983,41 +1032,24 @@ const Pricelist = () => {
     setShowModal(true);
   }, []);
 
-  // ── Final booking & modal reset ───────────────────────────────────────────
-  // handleRocketComplete: called by RocketLoader when its animation finishes.
-  // Closes ALL booking-related modals, clears cart/form, then shows success +
-  // the "bill downloaded" toaster notification.
   const handleRocketComplete = useCallback(() => {
-    // 1. Hide loader
     setShowLoader(false);
     setIsBookingLoading(false);
-
-    // 2. Close every booking modal
     setIsCartOpen(false);
     setShowModal(false);
     setShowSpinModal(false);
     setShowDetailsModal(false);
     setShowMinOrderModal(false);
     setIsExpandedCart(false);
-
-    // 3. Clear cart & free item
     setCart({});
     setFreeCartItem(null);
-
-    // 4. Reset customer form
     setCustomerDetails({
       customer_name: "", address: "", district: "", state: "",
       mobile_number: "", email: "", customer_type: "User",
     });
-
-    // 5. Reset promo
     setAppliedPromo(null);
     setPromocode("");
-
-    // 6. Show success animation
     setShowSuccess(true);
-
-    // 7. Show "bill downloaded" toaster notification
     setShowToaster(true);
   }, []);
 
@@ -1055,11 +1087,13 @@ const Pricelist = () => {
     }
     try {
       setShowLoader(true);
-      const response = await fetch(`${API_BASE_URL}/api/direct/bookings`, {
+ 
+      const bookingResponse = await fetch(`${API_BASE_URL}/api/direct/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          order_id, products: allProducts,
+          order_id,
+          products: allProducts,
           net_rate: Number.parseFloat(totals.net),
           you_save: Number.parseFloat(totals.save),
           processing_fee: Number.parseFloat(totals.processing_fee),
@@ -1080,27 +1114,40 @@ const Pricelist = () => {
           promocode: appliedPromo?.code || null,
         }),
       });
-      if (response.ok) {
-        const data = await response.json();
-        const pdfResponse = await fetch(`${API_BASE_URL}/api/direct/invoice/${data.order_id}`, { responseType: "blob" });
+ 
+      if (!bookingResponse.ok) {
+        const errData = await bookingResponse.json();
+        showError(errData.message || "Booking failed.");
+        setShowLoader(false);
+        setIsBookingLoading(false);
+        return;
+      }
+ 
+      const bookingData = await bookingResponse.json();
+      const confirmedOrderId = bookingData.order_id;
+ 
+      const pdfResponse = await fetch(`${API_BASE_URL}/api/direct/invoice/${confirmedOrderId}`);
+      if (pdfResponse.ok) {
         const blob = await pdfResponse.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
         const safeName = (customerDetails.customer_name || "order").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-        link.download = `${safeName}-${data.order_id}.pdf`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        link.download = `${safeName}-${confirmedOrderId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        // RocketLoader's onComplete fires next → handleRocketComplete cleans up everything
-      } else {
-        const data = await response.json(); showError(data.message || "Booking failed.");
-        setShowLoader(false); setIsBookingLoading(false);
       }
+ 
+      handleRocketComplete();
+ 
     } catch (err) {
       showError("Something went wrong during checkout.");
-      setShowLoader(false); setIsBookingLoading(false);
+      setShowLoader(false);
+      setIsBookingLoading(false);
     }
-  }, [cart, products, freeCartItem, customerDetails, states, totals, appliedPromo, showError]);
+  }, [cart, products, freeCartItem, customerDetails, states, totals, appliedPromo, showError, handleRocketComplete]);
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -1139,7 +1186,6 @@ const Pricelist = () => {
     return ["All", ...filtered];
   }, [products]);
 
-  // ── Grouped products ──────────────────────────────────────────────────────
   const grouped = useMemo(() => {
     const result = products.filter(p =>
       p.product_type !== "gift_box_dealers" &&
@@ -1178,14 +1224,12 @@ const Pricelist = () => {
     [cart]
   );
 
-  // Live cart subtotal displayed in the top banner (after product discounts, before promo/fee)
   const cartSubtotalDisplay = useMemo(() => formatPrice(totals.subtotalRaw), [totals.subtotalRaw]);
 
   if (isLoading) return <LoadingSpinner />;
 
-  // ── Sub-components ────────────────────────────────────────────────────────
   const SummaryRows = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, fontFamily: "'Barlow', sans-serif", fontSize: "13px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, fontFamily: "'Barlow', sans-serif", fontSize: "12px" }}>
       {[
         { label: "Net Total", val: `₹${totals.net}`, color: C.ink },
         { label: "Product Discount", val: `−₹${totals.product_discount}`, color: C.green },
@@ -1199,8 +1243,8 @@ const Pricelist = () => {
       ))}
       <div style={{
         display: "flex", justifyContent: "space-between",
-        fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "15px",
-        paddingTop: "0.5rem", borderTop: `2px solid ${C.parchment}`, color: C.crimson,
+        fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "14px",
+        paddingTop: "0.4rem", borderTop: `2px solid ${C.parchment}`, color: C.crimson,
       }}>
         <span>Total</span><span>₹{totals.total}</span>
       </div>
@@ -1208,22 +1252,22 @@ const Pricelist = () => {
   );
 
   const PromoSelector = () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {promocode === "custom" && (
         <input type="text" value="" onChange={e => setPromocode(e.target.value)}
           placeholder="Enter custom code"
           style={{
-            width: "100%", padding: "10px 14px",
+            width: "100%", padding: "8px 12px",
             border: `1.5px solid ${C.border}`, borderRadius: "4px",
             background: C.cream, fontFamily: "'Barlow', sans-serif",
-            fontSize: "14px", color: C.ink,
+            fontSize: "13px", color: C.ink,
           }} />
       )}
       {appliedPromo && (
         <p style={{
-          color: C.green, fontSize: "12px",
+          color: C.green, fontSize: "11px",
           background: "rgba(46,125,50,0.06)", border: "1px solid rgba(46,125,50,0.25)",
-          borderRadius: "4px", padding: "8px 12px",
+          borderRadius: "4px", padding: "6px 10px",
         }}>
           ✓ {appliedPromo.code} — {formatPercentage(appliedPromo.discount)}% OFF applied
         </p>
@@ -1231,21 +1275,17 @@ const Pricelist = () => {
     </div>
   );
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-        {/* <Navbar /> */}
+      {cartItemCount > 0 && (
+        <MinPurchasePipeline
+          subtotalRaw={totals.subtotalRaw}
+          onCartOpen={() => setIsCartOpen(true)}
+          isUnlocked={isCartUnlocked}
+        />
+      )}
 
-      <CartAmountBanner
-        cartItemCount={cartItemCount}
-        cartTotal={cartSubtotalDisplay}
-        onOpenCart={() => setIsCartOpen(true)}
-      />
-
-      {/* ── TOASTER: fires after booking completes, tells user bill was downloaded ── */}
       <ToasterNotification show={showToaster} onClose={() => setShowToaster(false)} />
-
-      {/* ── SUCCESS ANIMATION: show prop + onDismiss properly wired ── */}
       <SuccessAnimation show={showSuccess} onDismiss={() => setShowSuccess(false)} />
 
       <LuckySpinModal
@@ -1335,69 +1375,129 @@ const Pricelist = () => {
         )}
 
         {isCartOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
             style={{ background: "rgba(28,28,30,0.6)", backdropFilter: "blur(6px)" }}
-            onClick={() => { setIsCartOpen(false); setIsExpandedCart(false); }}>
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 40 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 40 }}
+            onClick={() => { setIsCartOpen(false); setIsExpandedCart(false); }}
+          >
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 340, damping: 36 }}
               onClick={e => e.stopPropagation()}
+              className="mobile:rounded-t-xl mobile:w-full"
               style={{
-                background: "#fff", border: `2px solid ${C.crimson}`,
-                borderRadius: "8px 8px 0 0", boxShadow: `6px 6px 0 ${C.crimson}`,
-                width: "100%", maxWidth: isExpandedCart ? "56rem" : "32rem",
-                maxHeight: "92vh", display: "flex", flexDirection: "column",
-              }}>
+                background: "#fff",
+                border: `2px solid ${C.crimson}`,
+                borderRadius: "12px 12px 0 0",
+                boxShadow: `0 -4px 40px rgba(0,0,0,0.18)`,
+                width: "100%",
+                maxWidth: isExpandedCart ? "55rem" : "34rem",
+                maxHeight: "80vh",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
               <div style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "1.25rem 1.5rem", borderBottom: `1.5px solid ${C.border}`,
+                padding: "0.5rem 1rem",
+                borderBottom: `1.5px solid ${C.border}`,
+                background: C.ivory,
+                flexShrink: 0,
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{
-                    width: 36, height: 36, background: `rgba(192,57,43,0.08)`,
+                    width: 28, height: 28,
+                    background: `rgba(192,57,43,0.09)`,
                     border: `1.5px dashed ${C.crimson}`, borderRadius: "6px",
                     display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
                   }}>
-                    <ShoppingCart style={{ width: 16, height: 16, color: C.crimson }} />
+                    <ShoppingCart style={{ width: 13, height: 13, color: C.crimson }} />
                   </div>
                   <div>
-                    <p className="display" style={{ fontSize: "1rem", color: C.ink }}>Your Cart</p>
-                    <p style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>
-                      {cartItemCount} item{cartItemCount !== 1 ? 's' : ''}{freeCartItem ? " + 1 free gift 🎁" : ""}
+                    <p className="display" style={{ fontSize: "0.85rem", color: C.ink, lineHeight: 1.2 }}>Your Cart</p>
+                    <p style={{ fontSize: "10px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>
+                      {cartItemCount} item{cartItemCount !== 1 ? 's' : ''}{freeCartItem ? " + 1 free 🎁" : ""}
                     </p>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  {!isCartUnlocked && cartItemCount > 0 && (
+                    <span style={{
+                      fontSize: "10px", color: C.saffron, fontFamily: "'Barlow', sans-serif", fontWeight: 700,
+                      background: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.3)",
+                      padding: "2px 7px", borderRadius: "100px", whiteSpace: "nowrap",
+                    }}>
+                      ₹{formatPrice(MIN_PURCHASE - totals.subtotalRaw)} to unlock
+                    </span>
+                  )}
                   {!isExpandedCart && Object.keys(cart).length > 0 && (
                     <button onClick={() => setIsExpandedCart(true)} style={{
-                      width: 32, height: 32, borderRadius: "4px",
+                      width: 26, height: 26, borderRadius: "4px",
                       border: `1.5px solid ${C.border}`, background: C.cream,
                       color: C.slate, cursor: "pointer", display: "flex",
                       alignItems: "center", justifyContent: "center",
                     }}>
-                      <FaExpand style={{ fontSize: 13 }} />
+                      <FaExpand style={{ fontSize: 10 }} />
                     </button>
                   )}
                   <button onClick={() => { setIsCartOpen(false); setIsExpandedCart(false); }} style={{
-                    width: 32, height: 32, borderRadius: "4px",
+                    width: 26, height: 26, borderRadius: "4px",
                     border: `1.5px solid ${C.border}`, background: C.cream,
                     color: C.crimson, cursor: "pointer", display: "flex",
-                    alignItems: "center", justifyContent: "center", fontSize: 16,
+                    alignItems: "center", justifyContent: "center", fontSize: 15,
                   }}>×</button>
                 </div>
               </div>
 
-              <div style={{ flex: 1, overflowY: "auto", padding: "1rem 1.25rem", display: "flex", flexDirection: "column", gap: 10 }}>
+              {!isCartUnlocked && cartItemCount > 0 && (
+                <div style={{
+                  padding: "0.3rem 1rem",
+                  background: C.parchment,
+                  borderBottom: `1px solid ${C.borderD}`,
+                  flexShrink: 0,
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.2rem" }}>
+                    <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", fontWeight: 600, color: C.slate }}>
+                      Min. purchase ₹{MIN_PURCHASE}
+                    </span>
+                    <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "11px", fontWeight: 800, color: C.crimson }}>
+                      {Math.round((totals.subtotalRaw / MIN_PURCHASE) * 100)}%
+                    </span>
+                  </div>
+                  <div style={{ height: 5, background: "rgba(0,0,0,0.08)", borderRadius: 100, overflow: "hidden" }}>
+                    <div
+                      className="pipeline-fill"
+                      style={{
+                        height: "100%",
+                        width: `${Math.min((totals.subtotalRaw / MIN_PURCHASE) * 100, 100)}%`,
+                        borderRadius: 100,
+                      }}
+                    />
+                  </div>
+                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", color: C.saffron, marginTop: "0.15rem", fontWeight: 600 }}>
+                    Add ₹{formatPrice(MIN_PURCHASE - totals.subtotalRaw)} more to unlock checkout
+                  </p>
+                </div>
+              )}
+
+              <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 0.875rem", display: "flex", flexDirection: "column", gap: 5, WebkitOverflowScrolling: "touch" }}>
                 {Object.keys(cart).length === 0 && !freeCartItem ? (
-                  <div style={{ textAlign: "center", padding: "4rem 0" }}>
+                  <div style={{ textAlign: "center", padding: "1.75rem 0" }}>
                     <div style={{
-                      width: 64, height: 64, background: `rgba(192,57,43,0.06)`,
+                      width: 44, height: 44,
+                      background: `rgba(192,57,43,0.06)`,
                       border: `1.5px dashed ${C.crimson}`, borderRadius: "8px",
-                      display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem",
+                      display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 0.6rem",
                     }}>
-                      <ShoppingCart style={{ width: 28, height: 28, color: C.crimson, opacity: 0.4 }} />
+                      <ShoppingCart style={{ width: 18, height: 18, color: C.crimson, opacity: 0.4 }} />
                     </div>
-                    <p className="display" style={{ color: C.muted, fontSize: "1rem" }}>Cart is empty</p>
-                    <p style={{ color: C.muted, fontSize: "13px", fontFamily: "'Lora', serif", fontStyle: "italic", marginTop: 4 }}>
+                    <p className="display" style={{ color: C.muted, fontSize: "0.9rem" }}>Cart is empty</p>
+                    <p style={{ color: C.muted, fontSize: "12px", fontFamily: "'Lora', serif", fontStyle: "italic", marginTop: 3 }}>
                       Add fireworks to begin your celebration
                     </p>
                   </div>
@@ -1412,43 +1512,45 @@ const Pricelist = () => {
                         ? product.images.filter(item => !item.includes("/video/") && !item.toLowerCase().endsWith(".gif"))[0] || need
                         : need;
                       return (
-                        <motion.div key={serial} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        <motion.div key={serial} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                           style={{
-                            display: "flex", alignItems: "center", gap: 12,
-                            padding: "10px 12px", background: C.cream,
-                            border: `1px solid ${C.border}`, borderRadius: "6px",
+                            display: "flex", alignItems: "center", gap: 7,
+                            padding: "18px",
+                            background: C.cream,
+                            border: `1px solid ${C.border}`, borderRadius: "7px",
                           }}>
                           <img src={imageSrc} alt={product.productname}
-                            style={{ width: 60, height: 60, borderRadius: "4px", objectFit: "cover", border: `1px solid ${C.border}`, cursor: "pointer", flexShrink: 0 }}
+                            style={{ width: 38, height: 38, borderRadius: "5px", objectFit: "cover", border: `1px solid ${C.border}`, cursor: "pointer", flexShrink: 0 }}
                             onClick={() => handleImageClick(product.images)} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{
-                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "13px", color: C.ink,
+                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "11px", color: C.ink,
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                              lineHeight: 1.3,
                             }}>{product.productname}</p>
                             {product.brand && (
                               <span style={{
-                                display: "inline-block", marginTop: 2, fontSize: "10px", color: C.brand,
+                                display: "inline-block", marginTop: 1, fontSize: "9px", color: C.brand,
                                 fontFamily: "'Barlow', sans-serif", fontWeight: 600,
-                                background: `rgba(21,101,192,0.08)`, padding: "1px 7px", borderRadius: "100px",
+                                background: `rgba(21,101,192,0.08)`, padding: "1px 5px", borderRadius: "100px",
                               }}>{product.brand}</span>
                             )}
-                            <p style={{ fontSize: "12px", color: C.crimson, fontWeight: 600, marginTop: 2 }}>
-                              ₹{priceAfterDiscount} × {qty} = ₹{formatPrice((product.price - discount) * qty)}
+                            <p style={{ fontSize: "10px", color: C.crimson, fontWeight: 700, marginTop: 2, fontFamily: "'Syne', sans-serif" }}>
+                              ₹{priceAfterDiscount} × {qty} = <span style={{ color: C.ink }}>₹{formatPrice((product.price - discount) * qty)}</span>
                             </p>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                            <button onClick={() => removeFromCart(product)} style={{
-                              width: 28, height: 28, background: C.crimson, color: "#fff",
-                              border: "none", borderRadius: "4px", cursor: "pointer",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                            }}><FaMinus style={{ fontSize: 10 }} /></button>
-                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "14px", minWidth: 24, textAlign: "center" }}>{qty}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
                             <button onClick={() => addToCart(product)} style={{
-                              width: 28, height: 28, background: C.crimson, color: "#fff",
+                              width: 24, height: 24, background: C.crimson, color: "#fff",
                               border: "none", borderRadius: "4px", cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center",
-                            }}><FaPlus style={{ fontSize: 10 }} /></button>
+                            }}><FaPlus style={{ fontSize: 8 }} /></button>
+                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "12px", minWidth: 16, textAlign: "center", color: C.ink }}>{qty}</span>
+                            <button onClick={() => removeFromCart(product)} style={{
+                              width: 24, height: 24, background: C.parchment, color: C.crimson,
+                              border: `1px solid ${C.borderD}`, borderRadius: "4px", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}><FaMinus style={{ fontSize: 8 }} /></button>
                           </div>
                         </motion.div>
                       );
@@ -1457,53 +1559,47 @@ const Pricelist = () => {
                     {freeCartItem && (
                       <>
                         <div style={{
-                          display: "flex", alignItems: "center", gap: 8,
-                          padding: "6px 0 2px", borderTop: `1.5px dashed ${C.border}`, marginTop: 4,
+                          display: "flex", alignItems: "center", gap: 7,
+                          padding: "4px 0 2px", borderTop: `1.5px dashed ${C.border}`, marginTop: 2,
                         }}>
-                          <Gift style={{ width: 14, height: 14, color: C.green }} />
+                          <Gift style={{ width: 11, height: 11, color: C.green }} />
                           <span style={{
-                            fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "11px",
+                            fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "9px",
                             letterSpacing: "0.18em", textTransform: "uppercase", color: C.green,
                           }}>Lucky Draw Free Gift</span>
                           <div style={{ flex: 1, height: "1px", background: `rgba(46,125,50,0.2)` }} />
                         </div>
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                           style={{
-                            display: "flex", alignItems: "center", gap: 12, padding: "10px 12px",
-                            background: "rgba(46,125,50,0.05)", border: `1.5px solid rgba(46,125,50,0.25)`, borderRadius: "6px",
+                            display: "flex", alignItems: "center", gap: 7, padding: "6px",
+                            background: "rgba(46,125,50,0.05)", border: `1.5px solid rgba(46,125,50,0.25)`, borderRadius: "7px",
                           }}>
                           <img
                             src={Array.isArray(freeCartItem.images)
                               ? freeCartItem.images.filter(i => !i.includes("/video/") && !i.toLowerCase().endsWith(".gif"))[0] || need
                               : need}
                             alt={freeCartItem.productname}
-                            style={{ width: 56, height: 56, borderRadius: "4px", objectFit: "cover", flexShrink: 0, border: "1px solid rgba(46,125,50,0.2)" }}
+                            style={{ width: 38, height: 38, borderRadius: "5px", objectFit: "cover", flexShrink: 0, border: "1px solid rgba(46,125,50,0.2)" }}
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{
-                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "13px", color: C.ink,
+                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "11px", color: C.ink,
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                             }}>{freeCartItem.productname}</p>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-                              <span style={{
-                                display: "inline-block", background: C.green, color: "#fff",
-                                fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "10px",
-                                letterSpacing: "0.1em", padding: "2px 10px", borderRadius: "100px",
-                              }}>🎁 FREE · ₹0.00</span>
-                              <span style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>Lucky Draw</span>
-                            </div>
+                            <span style={{
+                              display: "inline-block", marginTop: 3, background: C.green, color: "#fff",
+                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "9px",
+                              letterSpacing: "0.1em", padding: "2px 7px", borderRadius: "100px",
+                            }}>🎁 FREE · ₹0.00</span>
                           </div>
                           <button onClick={removeFreeItem} style={{
-                            width: 28, height: 28, background: "rgba(46,125,50,0.1)",
+                            width: 22, height: 22,
+                            background: "rgba(46,125,50,0.1)",
                             border: `1px solid rgba(46,125,50,0.3)`, borderRadius: "4px", cursor: "pointer",
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            color: C.green, fontSize: 14, flexShrink: 0,
-                          }} title="Remove free gift">×</button>
+                            color: C.green, fontSize: 13, flexShrink: 0,
+                          }}>×</button>
                         </motion.div>
-                        <p style={{
-                          textAlign: "center", fontSize: "11px", color: C.green,
-                          fontFamily: "'Barlow', sans-serif", fontStyle: "italic", marginTop: -4,
-                        }}>✅ Only 1 free gift per order allowed</p>
                       </>
                     )}
                   </>
@@ -1511,17 +1607,21 @@ const Pricelist = () => {
               </div>
 
               <div style={{
-                padding: "1.25rem 1.5rem", borderTop: `1.5px solid ${C.border}`,
-                background: "#fff", display: "flex", flexDirection: "column", gap: "1rem",
+                padding: "0.5rem 0.875rem",
+                borderTop: `1.5px solid ${C.border}`,
+                background: C.ivory,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.4rem",
+                flexShrink: 0,
               }}>
                 {!isExpandedCart && (
                   <>
-                    {/* Show spin eligibility hint in cart footer when total ≤ 3000 */}
-                    {totals.subtotalRaw > 0 && totals.subtotalRaw <= 3000 && (
+                    {totals.subtotalRaw > 0 && totals.subtotalRaw >= MIN_PURCHASE && totals.subtotalRaw <= 3000 && (
                       <div style={{
                         background: "rgba(230,126,34,0.07)", border: `1.5px solid rgba(230,126,34,0.3)`,
-                        borderRadius: "6px", padding: "10px 14px",
-                        fontFamily: "'Barlow', sans-serif", fontSize: "12px", color: C.saffron,
+                        borderRadius: "6px", padding: "5px 10px",
+                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.saffron,
                       }}>
                         🎰 Add ₹{formatPrice(3000 - totals.subtotalRaw)} more to unlock the <strong>Lucky Spin</strong>!
                       </div>
@@ -1529,8 +1629,8 @@ const Pricelist = () => {
                     {totals.subtotalRaw > 3000 && (
                       <div style={{
                         background: "rgba(46,125,50,0.07)", border: `1.5px solid rgba(46,125,50,0.3)`,
-                        borderRadius: "6px", padding: "10px 14px",
-                        fontFamily: "'Barlow', sans-serif", fontSize: "12px", color: C.green, fontWeight: 600,
+                        borderRadius: "6px", padding: "5px 10px",
+                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.green, fontWeight: 600,
                       }}>
                         🎁 Lucky Spin unlocked! Spin to win a free gift at checkout.
                       </div>
@@ -1538,36 +1638,49 @@ const Pricelist = () => {
                     <PromoSelector />
                     <div style={{
                       background: `rgba(192,57,43,0.05)`, border: `1.5px solid rgba(192,57,43,0.2)`,
-                      borderRadius: "6px", padding: "10px 14px", fontSize: "12px", color: C.slate,
+                      borderRadius: "6px", padding: "5px 10px", fontSize: "10px", color: C.slate,
                     }}>
-                      <p style={{ marginTop: 4 }}>⚠ Delivery charges are payable to transport. Pickup at your own cost.</p>
+                      <p>⚠ Delivery charges are payable to transport. Pickup at your own cost.</p>
                     </div>
                   </>
                 )}
+
                 <SummaryRows />
+
                 {freeCartItem && (
                   <div style={{
                     display: "flex", justifyContent: "space-between",
-                    padding: "6px 10px", background: "rgba(46,125,50,0.06)",
+                    padding: "3px 8px",
+                    background: "rgba(46,125,50,0.06)",
                     border: "1px solid rgba(46,125,50,0.25)", borderRadius: "4px",
-                    fontSize: "12px", color: C.green, fontFamily: "'Syne', sans-serif", fontWeight: 700,
+                    fontSize: "11px", color: C.green, fontFamily: "'Syne', sans-serif", fontWeight: 700,
                   }}>
                     <span>🎁 Lucky Draw Gift</span><span>₹0.00</span>
                   </div>
                 )}
+
                 {isExpandedCart ? (
                   <button onClick={() => setIsExpandedCart(false)} className="btn-outline" style={{ width: "100%", justifyContent: "center" }}>
-                    <FaCompress style={{ fontSize: 13 }} /> Collapse View
+                    <FaCompress style={{ fontSize: 12 }} /> Collapse View
                   </button>
                 ) : (
-                  <div style={{ display: "flex", gap: 12 }}>
+                  <div style={{ display: "flex", gap: 7 }}>
                     <button onClick={() => { setCart({}); setFreeCartItem(null); }} className="btn-outline"
-                      style={{ flex: 1, justifyContent: "center", fontSize: "13px", padding: "10px" }}>
-                      Clear Cart
+                      style={{ flex: 1, justifyContent: "center", fontSize: "11px", padding: "7px 6px" }}>
+                      Clear
                     </button>
-                    <button onClick={handleCheckoutClick} className="btn-primary"
-                      style={{ flex: 1, justifyContent: "center", fontSize: "13px", padding: "10px" }}>
-                      Checkout →
+                    <button
+                      onClick={handleCheckoutClick}
+                      disabled={!isCartUnlocked}
+                      className="btn-primary"
+                      style={{
+                        flex: 2, justifyContent: "center", fontSize: "12px", padding: "7px 6px",
+                        opacity: isCartUnlocked ? 1 : 0.5,
+                        cursor: isCartUnlocked ? "pointer" : "not-allowed",
+                        background: isCartUnlocked ? C.crimson : C.muted,
+                      }}
+                    >
+                      {isCartUnlocked ? "Checkout →" : `₹${formatPrice(MIN_PURCHASE - totals.subtotalRaw)} more needed`}
                     </button>
                   </div>
                 )}
@@ -1815,10 +1928,8 @@ const Pricelist = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Main Content ── */}
       <main style={{ paddingTop: "7rem", paddingBottom: "8rem", maxWidth: "80rem", margin: "0 auto", padding: "7rem 1.5rem 8rem" }}>
 
-        {/* ── Search Filters ── */}
         <motion.div className="mobile:-mt-8 hundred:-mt-15 tab:mt-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -1891,9 +2002,7 @@ const Pricelist = () => {
                 </span>
               )}
               <button
-                onClick={() => {
-                  clearSearch(); clearBrandSearch(); setSelectedBrand("All"); setSelectedType("All");
-                }}
+                onClick={() => { clearSearch(); clearBrandSearch(); setSelectedBrand("All"); setSelectedType("All"); }}
                 style={{
                   background: "none", border: "none", cursor: "pointer",
                   color: C.muted, fontSize: "12px", fontFamily: "'Barlow', sans-serif",
@@ -1905,7 +2014,6 @@ const Pricelist = () => {
           )}
         </motion.div>
 
-        {/* Action Buttons */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "2rem" }}>
           <button onClick={downloadPDF} className="btn-primary" style={{ gap: 10 }}>
@@ -1933,7 +2041,6 @@ const Pricelist = () => {
           </div>
         </motion.div>
 
-        {/* Type Chips */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "1.25rem" }}>
           <p className="label" style={{ marginBottom: "0.5rem" }}>Category</p>
           <div className="hscroll" style={{ display: "flex", gap: "12px", overflowX: "auto", padding: "4px 0 8px", scrollbarWidth: "thin" }}>
@@ -1947,7 +2054,6 @@ const Pricelist = () => {
           </div>
         </motion.div>
 
-        {/* Brand Chips */}
         {brandList.length > 1 && (
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "3rem" }}>
             <p className="label" style={{ marginBottom: "0.5rem" }}>Brand</p>
@@ -1963,7 +2069,6 @@ const Pricelist = () => {
           </motion.div>
         )}
 
-        {/* Product Grid */}
         {Object.entries(grouped).map(([type, items], groupIndex) => (
           <motion.section key={type}
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -2014,44 +2119,6 @@ const Pricelist = () => {
         )}
       </main>
 
-      {/* Floating Cart Button */}
-      <div style={{ position: "fixed", bottom: "2rem", right: "1.5rem", zIndex: 20 }}>
-        {!isCartOpen && (
-          <motion.button className="mobile:-mt-32" onClick={() => setIsCartOpen(true)} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}
-            style={{
-              width: 60, height: 60, background: C.crimson,
-              border: `2px solid ${C.crimson}`, borderRadius: "8px",
-              boxShadow: `4px 4px 0 ${C.crimsonD}`, color: "#fff", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center", position: "relative",
-            }}>
-            <ShoppingCart style={{ width: 22, height: 22 }} />
-            {cartItemCount > 0 && (
-              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
-                style={{
-                  position: "absolute", top: -8, right: -8, background: C.saffron, color: "#fff",
-                  fontSize: "11px", fontFamily: "'Syne', sans-serif", fontWeight: 800,
-                  width: 22, height: 22, display: "flex", alignItems: "center",
-                  justifyContent: "center", borderRadius: "100%", border: "2px solid #fff",
-                }}>
-                {cartItemCount}
-              </motion.span>
-            )}
-            {freeCartItem && (
-              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
-                style={{
-                  position: "absolute", top: -8, left: -8, background: C.green, color: "#fff",
-                  fontSize: "10px", width: 20, height: 20, display: "flex",
-                  alignItems: "center", justifyContent: "center",
-                  borderRadius: "100%", border: "2px solid #fff",
-                }}>
-                🎁
-              </motion.span>
-            )}
-          </motion.button>
-        )}
-      </div>
-
-      {/* Checkout / Customer Details Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -2061,63 +2128,66 @@ const Pricelist = () => {
               style={{
                 background: "#fff", border: `2px solid ${C.crimson}`,
                 borderRadius: "8px", boxShadow: `8px 8px 0 ${C.crimson}`,
-                maxWidth: "28rem", width: "100%", maxHeight: "90vh", overflowY: "auto",
+                maxWidth: "26rem",
+                width: "100%",
+                maxHeight: "78vh",
+                overflowY: "auto",
               }}>
-              <div style={{ padding: "2rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "1.75rem" }}>
+              <div style={{ padding: "1.25rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.1rem" }}>
                   <div style={{
-                    width: 40, height: 40, background: `rgba(192,57,43,0.08)`,
+                    width: 34, height: 34, background: `rgba(192,57,43,0.08)`,
                     border: `1.5px dashed ${C.crimson}`, borderRadius: "6px",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <ShoppingCart style={{ width: 18, height: 18, color: C.crimson }} />
+                    <ShoppingCart style={{ width: 15, height: 15, color: C.crimson }} />
                   </div>
                   <div>
-                    <h2 className="display" style={{ fontSize: "1.2rem", color: C.ink }}>Customer Details</h2>
-                    <p style={{ fontSize: "12px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>Fill in your details to confirm booking</p>
+                    <h2 className="display" style={{ fontSize: "1.05rem", color: C.ink }}>Customer Details</h2>
+                    <p style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>Fill in your details to confirm booking</p>
                   </div>
                 </div>
 
                 {freeCartItem && (
                   <div style={{
                     background: "rgba(46,125,50,0.07)", border: `1.5px solid rgba(46,125,50,0.3)`,
-                    borderRadius: "6px", padding: "10px 14px", marginBottom: "1rem",
-                    display: "flex", alignItems: "center", gap: 10,
+                    borderRadius: "6px", padding: "8px 12px", marginBottom: "0.75rem",
+                    display: "flex", alignItems: "center", gap: 8,
                   }}>
-                    <Gift style={{ width: 16, height: 16, color: C.green, flexShrink: 0 }} />
-                    <p style={{ fontSize: "13px", color: C.green, fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>
+                    <Gift style={{ width: 14, height: 14, color: C.green, flexShrink: 0 }} />
+                    <p style={{ fontSize: "12px", color: C.green, fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>
                       🎁 Lucky Draw: "{freeCartItem.productname}" included FREE!
                     </p>
                   </div>
                 )}
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
                   {["customer_name", "address", "mobile_number", "email"].map(field => (
                     <div key={field}>
-                      <p className="label" style={{ marginBottom: 6 }}>
+                      <p className="label" style={{ marginBottom: 4, fontSize: "10px" }}>
                         {field.replace(/_/g, " ")}{field !== "email" ? " *" : ""}
                       </p>
                       <input name={field} type={field === "email" ? "email" : "text"}
                         placeholder={`Enter ${field.replace(/_/g, " ")}`}
                         value={customerDetails[field]} onChange={handleInputChange}
                         style={{
-                          width: "100%", padding: "10px 14px",
+                          width: "100%", padding: "8px 12px",
                           border: `1.5px solid ${C.border}`, borderRadius: "4px",
                           background: C.cream, fontFamily: "'Barlow', sans-serif",
-                          fontSize: "14px", color: C.ink, outline: "none",
+                          fontSize: "13px", color: C.ink, outline: "none",
                         }}
                         required={field !== "email"} />
                     </div>
                   ))}
                   <div>
-                    <p className="label" style={{ marginBottom: 6 }}>State *</p>
+                    <p className="label" style={{ marginBottom: 4, fontSize: "10px" }}>State *</p>
                     <select name="state" value={customerDetails.state}
                       onChange={e => setCustomerDetails(prev => ({ ...prev, state: e.target.value, district: "" }))}
                       style={{
-                        width: "100%", padding: "10px 14px",
+                        width: "100%", padding: "8px 12px",
                         border: `1.5px solid ${C.border}`, borderRadius: "4px",
                         background: C.cream, fontFamily: "'Barlow', sans-serif",
-                        fontSize: "14px", color: C.ink, outline: "none",
+                        fontSize: "13px", color: C.ink, outline: "none",
                       }} required>
                       <option value="">Select State</option>
                       {states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
@@ -2125,13 +2195,13 @@ const Pricelist = () => {
                   </div>
                   {customerDetails.state && (
                     <div>
-                      <p className="label" style={{ marginBottom: 6 }}>City / Place *</p>
+                      <p className="label" style={{ marginBottom: 4, fontSize: "10px" }}>City / Place *</p>
                       <select name="district" value={customerDetails.district} onChange={handleInputChange}
                         style={{
-                          width: "100%", padding: "10px 14px",
+                          width: "100%", padding: "8px 12px",
                           border: `1.5px solid ${C.border}`, borderRadius: "4px",
                           background: C.cream, fontFamily: "'Barlow', sans-serif",
-                          fontSize: "14px", color: C.ink, outline: "none",
+                          fontSize: "13px", color: C.ink, outline: "none",
                         }} required>
                         <option value="">Select Place / City</option>
                         {districts.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
@@ -2141,39 +2211,39 @@ const Pricelist = () => {
 
                   <div style={{
                     background: C.cream, border: `1.5px solid ${C.border}`,
-                    borderRadius: "6px", padding: "1rem",
+                    borderRadius: "6px", padding: "0.75rem",
                   }}>
-                    <p className="label" style={{ marginBottom: "0.75rem" }}>Order Summary</p>
+                    <p className="label" style={{ marginBottom: "0.5rem", fontSize: "10px" }}>Order Summary</p>
                     <SummaryRows />
                     {freeCartItem && (
                       <div style={{
-                        marginTop: "0.75rem", paddingTop: "0.75rem",
+                        marginTop: "0.5rem", paddingTop: "0.5rem",
                         borderTop: `2px dashed rgba(46,125,50,0.35)`,
                       }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "0.5rem" }}>
-                          <Gift style={{ width: 13, height: 13, color: C.green }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "0.35rem" }}>
+                          <Gift style={{ width: 11, height: 11, color: C.green }} />
                           <p style={{
-                            fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "11px",
+                            fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "10px",
                             letterSpacing: "0.15em", textTransform: "uppercase", color: C.green,
                           }}>Lucky Draw — Free Gift</p>
                         </div>
                         <div style={{
                           display: "flex", justifyContent: "space-between", alignItems: "center",
-                          padding: "8px 10px", background: "rgba(46,125,50,0.05)",
+                          padding: "6px 8px", background: "rgba(46,125,50,0.05)",
                           border: "1px solid rgba(46,125,50,0.2)", borderRadius: "4px",
                         }}>
-                          <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "13px", color: C.ink, flex: 1 }}>
+                          <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "12px", color: C.ink, flex: 1 }}>
                             {freeCartItem.productname}
                           </span>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                            <span style={{ textDecoration: "line-through", color: C.muted, fontSize: "11px", fontFamily: "'Barlow', sans-serif" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                            <span style={{ textDecoration: "line-through", color: C.muted, fontSize: "10px", fontFamily: "'Barlow', sans-serif" }}>
                               ₹{formatPrice(freeCartItem.price || 0)}
                             </span>
-                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, color: C.green, fontSize: "14px" }}>₹0.00</span>
+                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, color: C.green, fontSize: "13px" }}>₹0.00</span>
                           </div>
                         </div>
                         <p style={{
-                          fontSize: "11px", color: C.green, marginTop: 6,
+                          fontSize: "10px", color: C.green, marginTop: 4,
                           fontFamily: "'Barlow', sans-serif", fontStyle: "italic", textAlign: "right",
                         }}>* This item is free and not included in the total.</p>
                       </div>
@@ -2181,14 +2251,14 @@ const Pricelist = () => {
                   </div>
                 </div>
 
-                <div style={{ marginTop: "1.5rem", display: "flex", gap: 12 }}>
+                <div style={{ marginTop: "1rem", display: "flex", gap: 10 }}>
                   <button onClick={() => setShowModal(false)} className="btn-outline"
-                    style={{ flex: 1, justifyContent: "center", fontSize: "13px", padding: "10px" }}>
+                    style={{ flex: 1, justifyContent: "center", fontSize: "12px", padding: "8px" }}>
                     Cancel
                   </button>
                   <button onClick={handleFinalCheckout} disabled={isBookingLoading} className="btn-primary"
                     style={{
-                      flex: 1, justifyContent: "center", fontSize: "13px", padding: "10px",
+                      flex: 1, justifyContent: "center", fontSize: "12px", padding: "8px",
                       opacity: isBookingLoading ? 0.75 : 1,
                       cursor: isBookingLoading ? "not-allowed" : "pointer",
                     }}>

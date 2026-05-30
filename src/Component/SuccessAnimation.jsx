@@ -144,7 +144,7 @@ const SuccessAnimation = ({ show, onDismiss }) => {
               }}
             >
               <Sparkles style={{ width: 15, height: 15 }} />
-              Thank you for choosing Madhu Nisha Crackers
+              Thank you for choosing Sree Palaniyappa Crackers
               <Sparkles style={{ width: 15, height: 15 }} />
             </motion.div>
 
