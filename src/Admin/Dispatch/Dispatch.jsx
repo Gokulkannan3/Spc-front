@@ -39,24 +39,42 @@ export default function Dispatch() {
   const [downloadTarget, setDownloadTarget] = useState(null);
   const ordersPerPage = 9;
 
+  // Fetch bookings
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         const allowedStatuses = ['paid', 'packed', 'dispatched', 'delivered'];
         const statuses = filterStatus ? [filterStatus] : allowedStatuses;
-        const response = await axios.get(`${API_BASE_URL}/api/tracking/filtered-bookings`, { params: { status: statuses.join(',') } });
-        setBookings(response.data);
+        
+        const response = await axios.get(`${API_BASE_URL}/api/tracking/filtered-bookings`, { 
+          params: { status: statuses.join(',') } 
+        });
+
+        // Sort by latest order first (assuming higher id = newer)
+        const sortedBookings = [...response.data].sort((a, b) => (b.id || 0) - (a.id || 0));
+        
+        setBookings(sortedBookings);
         setError('');
-        setCurrentPage(1);
-      } catch { setError('Failed to fetch bookings'); }
+      } catch {
+        setError('Failed to fetch bookings');
+      }
     };
+
     fetchBookings();
     const interval = setInterval(fetchBookings, 10000);
     return () => clearInterval(interval);
   }, [filterStatus]);
 
+  // Reset to first page only when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus]);
+
   const handleStatusChange = (id, newStatus) => {
-    if (newStatus === 'dispatched') { setSelectedBookingId(id); setIsModalOpen(true); }
+    if (newStatus === 'dispatched') { 
+      setSelectedBookingId(id); 
+      setIsModalOpen(true); 
+    }
     else updateStatus(id, newStatus);
   };
 
@@ -64,18 +82,27 @@ export default function Dispatch() {
     try {
       const payload = { status: newStatus, ...transportInfo };
       await axios.put(`${API_BASE_URL}/api/tracking/fbookings/${id}/status`, payload);
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus, ...transportInfo } : b));
+      
+      setBookings(prev => prev.map(b => 
+        b.id === id ? { ...b, status: newStatus, ...transportInfo } : b
+      ));
+      
       if (newStatus === 'dispatched' && transportInfo) {
         setSuccessMessage('Transport details added successfully');
         setTimeout(() => setSuccessMessage(''), 3000);
       }
       setError('');
-    } catch { setError('Failed to update status'); }
+    } catch {
+      setError('Failed to update status');
+    }
   };
 
   const handleModalSubmit = async (e) => {
     e.preventDefault();
-    if (!transportDetails.transportName || !transportDetails.lrNumber) { setError('Transport Name and LR Number are required'); return; }
+    if (!transportDetails.transportName || !transportDetails.lrNumber) { 
+      setError('Transport Name and LR Number are required'); 
+      return; 
+    }
     await updateStatus(selectedBookingId, 'dispatched', transportDetails);
     setIsModalOpen(false);
     setTransportDetails({ transportName: '', lrNumber: '', transportContact: '' });
@@ -85,6 +112,8 @@ export default function Dispatch() {
     setIsModalOpen(false);
     setTransportDetails({ transportName: '', lrNumber: '', transportContact: '' });
   };
+
+  // ... (generateBillPDF, generatePackingPDF, handleDownloadClick, handleDownloadChoice remain unchanged)
 
   const generateBillPDF = async (booking) => {
     try {
@@ -116,7 +145,6 @@ export default function Dispatch() {
       const marginL = 14;
       const contentW = pageW - marginL * 2;
 
-      // ── Header ──
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(234, 88, 12);
@@ -131,7 +159,6 @@ export default function Dispatch() {
       doc.setLineWidth(0.8);
       doc.line(marginL, 29, marginL + contentW, 29);
 
-      // ── PACKING SLIP label ──
       doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(40, 40, 40);
@@ -141,7 +168,6 @@ export default function Dispatch() {
       doc.setLineWidth(0.4);
       doc.line(marginL, 41, marginL + contentW, 41);
 
-      // ── FROM / BILL TO boxes ──
       const boxY = 46;
       const boxH = 52;
       const halfW = contentW / 2 - 4;
@@ -185,7 +211,6 @@ export default function Dispatch() {
       doc.text(distState, shipX + 4, boxY + 32);
       doc.text(`Mobile: ${booking.mobile_number || 'N/A'}`, shipX + 4, boxY + 40);
 
-      // ── Order ID row ──
       const metaY = boxY + boxH + 8;
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
@@ -199,7 +224,6 @@ export default function Dispatch() {
       doc.setLineWidth(0.4);
       doc.line(marginL, metaY + 4, marginL + contentW, metaY + 4);
 
-      // ── Products table — NO rate, NO total ──
       let products = [];
       try {
         products = typeof booking.products === 'string'
@@ -235,7 +259,6 @@ export default function Dispatch() {
         alternateRowStyles: { fillColor: [255, 247, 237] },
       });
 
-      // ── Footer ──
       const finalY = doc.lastAutoTable.finalY + 10;
       doc.setDrawColor(234, 88, 12);
       doc.setLineWidth(0.6);
@@ -268,11 +291,16 @@ export default function Dispatch() {
   };
 
   const filteredBookings = bookings.filter(b =>
-    ['customer_name', 'order_id', 'total'].some(key => b[key]?.toString().toLowerCase().includes(searchQuery.toLowerCase()))
+    ['customer_name', 'order_id', 'total'].some(key => 
+      b[key]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   const totalPages = Math.ceil(filteredBookings.length / ordersPerPage);
-  const currentOrders = filteredBookings.slice((currentPage - 1) * ordersPerPage, currentPage * ordersPerPage);
+  const currentOrders = filteredBookings.slice(
+    (currentPage - 1) * ordersPerPage, 
+    currentPage * ordersPerPage
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -289,26 +317,38 @@ export default function Dispatch() {
           {error && <div className="bg-red-50 border border-red-200 border-l-4 border-l-red-500 text-red-700 px-4 py-3.5 rounded-xl mb-5 text-sm font-medium">⚠️ {error}</div>}
           {successMessage && <div className="bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 text-emerald-800 px-4 py-3.5 rounded-xl mb-5 text-sm font-medium">✓ {successMessage}</div>}
 
+          {/* Filters */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-5 mb-6">
             <div className="flex flex-wrap gap-3 items-end">
               <div className="min-w-44">
                 <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Status</label>
-                <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setCurrentPage(1); }} className={inputCls}>
+                <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={inputCls}>
                   <option value="">All Statuses</option>
-                  {['paid', 'packed', 'dispatched', 'delivered'].map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                  {['paid', 'packed', 'dispatched', 'delivered'].map(s => (
+                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                  ))}
                 </select>
               </div>
               <div className="min-w-64 flex-1">
                 <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Search</label>
                 <div className="relative">
                   <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
-                  <input type="text" placeholder="Name, Order ID or Total..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none focus:border-indigo-400 transition-colors box-border" />
+                  <input 
+                    type="text" 
+                    placeholder="Name, Order ID or Total..." 
+                    value={searchQuery} 
+                    onChange={e => { 
+                      setSearchQuery(e.target.value); 
+                      setCurrentPage(1); 
+                    }}
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none focus:border-indigo-400 transition-colors box-border" 
+                  />
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Orders Grid */}
           {currentOrders.length === 0 ? (
             <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl mb-6">
               <div className="text-4xl mb-3">📦</div>
@@ -318,6 +358,7 @@ export default function Dispatch() {
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 mb-6">
               {currentOrders.map((booking) => (
                 <div key={booking.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  {/* Card content remains same */}
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <div className="text-base font-bold text-slate-800">{booking.customer_name || 'N/A'}</div>
@@ -342,7 +383,9 @@ export default function Dispatch() {
                   <div className="flex flex-col gap-2">
                     <select value={booking.status} onChange={e => handleStatusChange(booking.id, e.target.value)} className={inputCls}>
                       <option value="" disabled>Update Status</option>
-                      {['paid', 'packed', 'dispatched', 'delivered'].map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                      {['paid', 'packed', 'dispatched', 'delivered'].map(s => (
+                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                      ))}
                     </select>
                     <button onClick={() => handleDownloadClick(booking)}
                       className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all duration-200">
@@ -354,18 +397,27 @@ export default function Dispatch() {
             </div>
           )}
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center gap-1.5 flex-wrap">
               <PaginBtn label="← Prev" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} />
-              {Array.from({ length: totalPages }, (_, i) => i + 1).slice(Math.max(0, currentPage - 3), Math.min(totalPages, currentPage + 2)).map(page => (
-                <PaginBtn key={page} label={page} onClick={() => setCurrentPage(page)} active={currentPage === page} />
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .slice(Math.max(0, currentPage - 3), Math.min(totalPages, currentPage + 2))
+                .map(page => (
+                  <PaginBtn 
+                    key={page} 
+                    label={page} 
+                    onClick={() => setCurrentPage(page)} 
+                    active={currentPage === page} 
+                  />
+                ))}
               <PaginBtn label="Next →" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} />
             </div>
           )}
         </div>
       </div>
 
+      {/* Modals remain unchanged */}
       {showDownloadModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
@@ -373,17 +425,14 @@ export default function Dispatch() {
             <h2 className="text-xl font-extrabold text-slate-800 mb-2">Download PDF</h2>
             <p className="text-slate-400 text-sm mb-7">Choose the type of PDF to download</p>
             <div className="flex gap-3">
-              <button onClick={() => handleDownloadChoice('bill')}
-                className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-br from-indigo-500 to-indigo-400 shadow-lg shadow-indigo-200 hover:from-indigo-600 hover:to-indigo-500 transition-all">
+              <button onClick={() => handleDownloadChoice('bill')} className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-br from-indigo-500 to-indigo-400 shadow-lg shadow-indigo-200 hover:from-indigo-600 hover:to-indigo-500 transition-all">
                 🧾 Bill
               </button>
-              <button onClick={() => handleDownloadChoice('packing')}
-                className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-br from-orange-500 to-orange-400 shadow-lg shadow-orange-200 hover:from-orange-600 hover:to-orange-500 transition-all">
+              <button onClick={() => handleDownloadChoice('packing')} className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-gradient-to-br from-orange-500 to-orange-400 shadow-lg shadow-orange-200 hover:from-orange-600 hover:to-orange-500 transition-all">
                 📦 Packing
               </button>
             </div>
-            <button onClick={() => { setShowDownloadModal(false); setDownloadTarget(null); }}
-              className="mt-4 w-full py-2.5 rounded-xl border border-slate-200 text-slate-500 font-semibold text-sm hover:bg-slate-50 transition-colors">
+            <button onClick={() => { setShowDownloadModal(false); setDownloadTarget(null); }} className="mt-4 w-full py-2.5 rounded-xl border border-slate-200 text-slate-500 font-semibold text-sm hover:bg-slate-50 transition-colors">
               Cancel
             </button>
           </div>
@@ -396,11 +445,23 @@ export default function Dispatch() {
             <h2 className="text-xl font-extrabold text-slate-800 mb-6 text-center">🚚 Transport Details</h2>
             {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-xs">⚠️ {error}</div>}
             <form onSubmit={handleModalSubmit} className="space-y-4">
-              {[["Transport Name", "transportName", "Enter transport name", true], ["LR Number", "lrNumber", "Enter LR number", true], ["Transport Contact", "transportContact", "Enter contact number (optional)", false]].map(([label, key, placeholder, required]) => (
+              {[
+                ["Transport Name", "transportName", "Enter transport name", true],
+                ["LR Number", "lrNumber", "Enter LR number", true],
+                ["Transport Contact", "transportContact", "Enter contact number (optional)", false]
+              ].map(([label, key, placeholder, required]) => (
                 <div key={key}>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</label>
-                  <input type="text" value={transportDetails[key]} onChange={e => setTransportDetails({ ...transportDetails, [key]: e.target.value })}
-                    placeholder={placeholder} className={inputCls} required={required} />
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                    {label}{required && <span className="text-red-500 ml-0.5">*</span>}
+                  </label>
+                  <input 
+                    type="text" 
+                    value={transportDetails[key]} 
+                    onChange={e => setTransportDetails({ ...transportDetails, [key]: e.target.value })}
+                    placeholder={placeholder} 
+                    className={inputCls} 
+                    required={required} 
+                  />
                 </div>
               ))}
               <div className="flex justify-end gap-2.5 pt-2">

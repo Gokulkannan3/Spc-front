@@ -100,11 +100,9 @@ if (typeof document !== "undefined" && !document.getElementById("pricelist-style
   document.head.appendChild(styleEl);
 }
 
+const roundPrice = (v) => Math.round(parseFloat(v) || 0);
 const formatPercentage = (v) => Math.round(Number.parseFloat(v)).toString();
-const formatPrice = (price) => {
-  const n = Number.parseFloat(price);
-  return Number.isInteger(n) ? n.toString() : n.toFixed(2);
-};
+const formatPrice = (price) => String(roundPrice(price));
 const capitalize = str =>
   str ? str.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : '';
 const serialSort = (a, b) =>
@@ -151,21 +149,21 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
               🎉 Cart!
             </span>
           ) : (
-            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: "18px" }}>
+            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "18px" }}>
               Add ₹{formatPrice(remaining)} more to open cart
             </span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "14px" }}>
+          <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "20px" }}>
             ₹{formatPrice(subtotalRaw)}
-            <span style={{ fontSize: "10px", fontWeight: 500, opacity: 0.7 }}> / ₹{MIN_PURCHASE}</span>
+            <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.7 }}> / ₹{MIN_PURCHASE}</span>
           </span>
           {isUnlocked && (
             <span style={{
               background: "rgba(255,255,255,0.2)", borderRadius: "4px",
               padding: "2px 10px", fontSize: "12px", fontFamily: "'Barlow', sans-serif",
-              fontWeight: 700,
+              fontWeight: 400,
             }}>View Cart →</span>
           )}
         </div>
@@ -203,7 +201,7 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
 MinPurchasePipeline.displayName = "MinPurchasePipeline";
 
 const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onImageClick }) => {
-  const originalPrice = Number.parseFloat(product.price);
+  const originalPrice = roundPrice(product.price);
   const discount = originalPrice * (product.discount / 100);
   const finalPrice = product.discount > 0
     ? formatPrice(originalPrice - discount)
@@ -276,7 +274,7 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
           </p>
           {product.brand && (
             <span style={{
-              fontSize: "10px", color: C.brand, fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+              fontSize: "10px", color: C.brand, fontFamily: "'Barlow', sans-serif", fontWeight: 400,
               background: `rgba(21,101,192,0.08)`, padding: "1px 7px", borderRadius: "100px",
             }}>{product.brand}</span>
           )}
@@ -288,11 +286,11 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
         }}>{product.productname}</h3>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: "0.75rem" }}>
           {product.discount > 0 && (
-            <span style={{ fontSize: "12px", color: C.muted, textDecoration: "line-through" }}>
+            <span style={{ fontSize: "18px", color: C.muted, textDecoration: "line-through", fontWeight: 1000 }}>
               ₹{formatPrice(originalPrice)}
             </span>
           )}
-          <span className="display" style={{ fontSize: "1.25rem", color: C.crimson }}>₹{finalPrice}</span>
+          <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "1.25rem", color: C.crimson }}>₹{finalPrice}</span>
           <span style={{ fontSize: "11px", color: C.muted }}>/{product.per}</span>
         </div>
         <div className="flex justify-end">
@@ -311,7 +309,7 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
                   <FaMinus style={{ fontSize: 9 }} />
                 </button>
                 <span style={{
-                  color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: 800,
+                  color: "#fff", fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                   fontSize: "14px", minWidth: "2rem", textAlign: "center",
                 }}>{count}</span>
                 <button onClick={() => onAdd(product)} style={{
@@ -536,8 +534,8 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
                 <p style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, color: C.ink, fontSize: "14px", lineHeight: 1.3 }}>
                   {result.productname}
                 </p>
-                <p style={{ fontSize: "12px", color: C.green, fontWeight: 600, marginTop: 4 }}>
-                  Added FREE to your cart · ₹0.00
+                <p style={{ fontSize: "12px", color: C.green, fontWeight: 400, marginTop: 4 }}>
+                  Added FREE to your cart · ₹0
                 </p>
               </motion.div>
             )}
@@ -729,8 +727,8 @@ const Pricelist = () => {
       let slNo = 1;
       for (const product of typeProducts) {
         if (yOffset + ROW_HEIGHT > doc.internal.pageSize.getHeight() - 15) { doc.addPage(); yOffset = 20; }
-        const discount = product.price * (product.discount / 100);
-        const discountedRate = product.price - discount;
+        const discount = roundPrice(product.price) * (product.discount / 100);
+        const discountedRate = roundPrice(product.price) - discount;
         if (slNo % 2 === 0) { doc.setFillColor(255, 247, 237); doc.rect(10, yOffset, pageWidth - 20, ROW_HEIGHT, 'F'); }
         doc.setDrawColor(220, 220, 220); doc.rect(10, yOffset, pageWidth - 20, ROW_HEIGHT);
         [21, 37, 59, 129, 150, 173].forEach(x => doc.line(x, yOffset, x, yOffset + ROW_HEIGHT));
@@ -904,7 +902,7 @@ const Pricelist = () => {
         !(typeof p.status === "string" && p.status.toLowerCase() === "free")
       ).forEach(p => {
         const type = p.product_type?.toLowerCase();
-        if (byType[type]) byType[type].push({ ...p, finalPrice: p.price * (1 - (p.discount || 0) / 100) });
+        if (byType[type]) byType[type].push({ ...p, finalPrice: roundPrice(p.price) * (1 - (p.discount || 0) / 100) });
       });
       for (const type of types) byType[type].sort(() => Math.random() - 0.5).sort((a, b) => {
         const d = a.finalPrice - b.finalPrice;
@@ -926,7 +924,7 @@ const Pricelist = () => {
         Object.keys(tempCart).map(serial => {
           const p = products.find(x => x.serial_number === serial);
           if (!p || p.product_type?.toLowerCase() !== type) return null;
-          return { ...p, finalPrice: p.price * (1 - (p.discount || 0) / 100) };
+          return { ...p, finalPrice: roundPrice(p.price) * (1 - (p.discount || 0) / 100) };
         }).filter(Boolean).sort(() => Math.random() - 0.5)
       );
       let boostRemaining = phase2Budget;
@@ -979,7 +977,7 @@ const Pricelist = () => {
       const qty = cart[serial];
       const p = products.find(x => x.serial_number === serial);
       if (!p) continue;
-      const orig = Number.parseFloat(p.price);
+      const orig = roundPrice(p.price);
       const disc = orig * (p.discount / 100);
       const after = orig - disc;
       net += orig * qty;
@@ -1060,7 +1058,7 @@ const Pricelist = () => {
       const product = products.find(p => p.serial_number === serial);
       return {
         id: product.id, product_type: product.product_type, quantity: qty,
-        per: product.per, price: product.price, discount: product.discount,
+        per: product.per, price: roundPrice(product.price), discount: product.discount,
         serial_number: product.serial_number, productname: product.productname,
         status: product.status,
       };
@@ -1081,24 +1079,24 @@ const Pricelist = () => {
     if (mobile.length !== 10) { showError("Mobile number must be 10 digits."); setIsBookingLoading(false); return; }
     const selectedState = customerDetails.state?.trim();
     const minOrder = states.find(s => s.name === selectedState)?.min_rate;
-    if (minOrder && Number.parseFloat(totals.originalTotal) < minOrder) {
-      showError(`Minimum order for ${selectedState} is ₹${minOrder}. Your total is ₹${totals.originalTotal}.`);
+    if (minOrder && totals.originalTotal < minOrder) {
+      showError(`Minimum order for ${selectedState} is ₹${minOrder}. Your total is ₹${formatPrice(totals.originalTotal)}.`);
       setIsBookingLoading(false); return;
     }
     try {
       setShowLoader(true);
- 
+
       const bookingResponse = await fetch(`${API_BASE_URL}/api/direct/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           order_id,
           products: allProducts,
-          net_rate: Number.parseFloat(totals.net),
-          you_save: Number.parseFloat(totals.save),
-          processing_fee: Number.parseFloat(totals.processing_fee),
-          total: Number.parseFloat(totals.total),
-          promo_discount: Number.parseFloat(totals.promo_discount || "0.00"),
+          net_rate: Number(totals.net),
+          you_save: Number(totals.save),
+          processing_fee: Number(totals.processing_fee),
+          total: Number(totals.total),
+          promo_discount: Number(totals.promo_discount || "0"),
           free_item: freeCartItem ? {
             serial_number: freeCartItem.serial_number,
             productname: freeCartItem.productname,
@@ -1114,7 +1112,7 @@ const Pricelist = () => {
           promocode: appliedPromo?.code || null,
         }),
       });
- 
+
       if (!bookingResponse.ok) {
         const errData = await bookingResponse.json();
         showError(errData.message || "Booking failed.");
@@ -1122,10 +1120,10 @@ const Pricelist = () => {
         setIsBookingLoading(false);
         return;
       }
- 
+
       const bookingData = await bookingResponse.json();
       const confirmedOrderId = bookingData.order_id;
- 
+
       const pdfResponse = await fetch(`${API_BASE_URL}/api/direct/invoice/${confirmedOrderId}`);
       if (pdfResponse.ok) {
         const blob = await pdfResponse.blob();
@@ -1139,9 +1137,9 @@ const Pricelist = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }
- 
+
       handleRocketComplete();
- 
+
     } catch (err) {
       showError("Something went wrong during checkout.");
       setShowLoader(false);
@@ -1214,7 +1212,7 @@ const Pricelist = () => {
       const qty = suggestedCart[serial];
       const p = products.find(x => x.serial_number === serial);
       if (!p) continue;
-      total += (p.price * (1 - p.discount / 100)) * qty;
+      total += (roundPrice(p.price) * (1 - p.discount / 100)) * qty;
     }
     return formatPrice(total);
   }, [suggestedCart, products]);
@@ -1224,8 +1222,6 @@ const Pricelist = () => {
     [cart]
   );
 
-  const cartSubtotalDisplay = useMemo(() => formatPrice(totals.subtotalRaw), [totals.subtotalRaw]);
-
   if (isLoading) return <LoadingSpinner />;
 
   const SummaryRows = () => (
@@ -1234,16 +1230,16 @@ const Pricelist = () => {
         { label: "Net Total", val: `₹${totals.net}`, color: C.ink },
         { label: "Product Discount", val: `−₹${totals.product_discount}`, color: C.green },
         ...(appliedPromo ? [{ label: `Promo (${appliedPromo.code})`, val: `−₹${totals.promo_discount}`, color: C.green }] : []),
-        { label: "You Save", val: `−₹${totals.save}`, color: C.green, bold: true },
+        { label: "You Save", val: `−₹${totals.save}`, color: C.green },
         { label: "Processing Fee (1%)", val: `₹${totals.processing_fee}`, color: C.muted },
-      ].map(({ label, val, color, bold }) => (
-        <div key={label} style={{ display: "flex", justifyContent: "space-between", color, fontWeight: bold ? 700 : 400 }}>
+      ].map(({ label, val, color }) => (
+        <div key={label} style={{ display: "flex", justifyContent: "space-between", color, fontWeight: 400 }}>
           <span>{label}</span><span>{val}</span>
         </div>
       ))}
       <div style={{
         display: "flex", justifyContent: "space-between",
-        fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "14px",
+        fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "14px",
         paddingTop: "0.4rem", borderTop: `2px solid ${C.parchment}`, color: C.crimson,
       }}>
         <span>Total</span><span>₹{totals.total}</span>
@@ -1349,8 +1345,8 @@ const Pricelist = () => {
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
                       {selectedProduct.discount > 0 && <span className="pill pill-saffron">{formatPercentage(selectedProduct.discount)}% OFF</span>}
-                      <span className="display" style={{ fontSize: "1.5rem", color: C.crimson }}>
-                        ₹{formatPrice(selectedProduct.price * (1 - selectedProduct.discount / 100))}
+                      <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "1.5rem", color: C.crimson }}>
+                        ₹{formatPrice(roundPrice(selectedProduct.price) * (1 - selectedProduct.discount / 100))}
                       </span>
                     </div>
                   </div>
@@ -1428,7 +1424,7 @@ const Pricelist = () => {
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   {!isCartUnlocked && cartItemCount > 0 && (
                     <span style={{
-                      fontSize: "10px", color: C.saffron, fontFamily: "'Barlow', sans-serif", fontWeight: 700,
+                      fontSize: "10px", color: C.saffron, fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                       background: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.3)",
                       padding: "2px 7px", borderRadius: "100px", whiteSpace: "nowrap",
                     }}>
@@ -1462,10 +1458,10 @@ const Pricelist = () => {
                   flexShrink: 0,
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.2rem" }}>
-                    <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", fontWeight: 600, color: C.slate }}>
+                    <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", fontWeight: 400, color: C.slate }}>
                       Min. purchase ₹{MIN_PURCHASE}
                     </span>
-                    <span style={{ fontFamily: "'Syne', sans-serif", fontSize: "11px", fontWeight: 800, color: C.crimson }}>
+                    <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: "11px", fontWeight: 400, color: C.crimson }}>
                       {Math.round((totals.subtotalRaw / MIN_PURCHASE) * 100)}%
                     </span>
                   </div>
@@ -1479,7 +1475,7 @@ const Pricelist = () => {
                       }}
                     />
                   </div>
-                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", color: C.saffron, marginTop: "0.15rem", fontWeight: 600 }}>
+                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", color: C.saffron, marginTop: "0.15rem", fontWeight: 400 }}>
                     Add ₹{formatPrice(MIN_PURCHASE - totals.subtotalRaw)} more to unlock checkout
                   </p>
                 </div>
@@ -1506,8 +1502,9 @@ const Pricelist = () => {
                     {Object.entries(cart).map(([serial, qty]) => {
                       const product = products.find(p => p.serial_number === serial);
                       if (!product) return null;
-                      const discount = (product.price * product.discount) / 100;
-                      const priceAfterDiscount = formatPrice(product.price - discount);
+                      const origPrice = roundPrice(product.price);
+                      const discountAmt = (origPrice * product.discount) / 100;
+                      const priceAfterDiscount = formatPrice(origPrice - discountAmt);
                       const imageSrc = Array.isArray(product.images)
                         ? product.images.filter(item => !item.includes("/video/") && !item.toLowerCase().endsWith(".gif"))[0] || need
                         : need;
@@ -1524,33 +1521,33 @@ const Pricelist = () => {
                             onClick={() => handleImageClick(product.images)} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{
-                              fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "11px", color: C.ink,
+                              fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "12px", color: C.ink,
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                               lineHeight: 1.3,
                             }}>{product.productname}</p>
                             {product.brand && (
                               <span style={{
                                 display: "inline-block", marginTop: 1, fontSize: "9px", color: C.brand,
-                                fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+                                fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                                 background: `rgba(21,101,192,0.08)`, padding: "1px 5px", borderRadius: "100px",
                               }}>{product.brand}</span>
                             )}
-                            <p style={{ fontSize: "10px", color: C.crimson, fontWeight: 700, marginTop: 2, fontFamily: "'Syne', sans-serif" }}>
-                              ₹{priceAfterDiscount} × {qty} = <span style={{ color: C.ink }}>₹{formatPrice((product.price - discount) * qty)}</span>
+                            <p style={{ fontSize: "15px", color: C.crimson, fontWeight: 1000, marginTop: 2, fontFamily: "'Barlow', sans-serif" }}>
+                              ₹{priceAfterDiscount} × {qty} = <span style={{ color: C.ink }}>₹{formatPrice((origPrice - discountAmt) * qty)}</span>
                             </p>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
-                            <button onClick={() => addToCart(product)} style={{
-                              width: 24, height: 24, background: C.crimson, color: "#fff",
-                              border: "none", borderRadius: "4px", cursor: "pointer",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                            }}><FaPlus style={{ fontSize: 8 }} /></button>
-                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "12px", minWidth: 16, textAlign: "center", color: C.ink }}>{qty}</span>
                             <button onClick={() => removeFromCart(product)} style={{
                               width: 24, height: 24, background: C.parchment, color: C.crimson,
                               border: `1px solid ${C.borderD}`, borderRadius: "4px", cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center",
                             }}><FaMinus style={{ fontSize: 8 }} /></button>
+                            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "12px", minWidth: 16, textAlign: "center", color: C.ink }}>{qty}</span>
+                            <button onClick={() => addToCart(product)} style={{
+                              width: 24, height: 24, background: C.crimson, color: "#fff",
+                              border: "none", borderRadius: "4px", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}><FaPlus style={{ fontSize: 8 }} /></button>
                           </div>
                         </motion.div>
                       );
@@ -1590,7 +1587,7 @@ const Pricelist = () => {
                               display: "inline-block", marginTop: 3, background: C.green, color: "#fff",
                               fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "9px",
                               letterSpacing: "0.1em", padding: "2px 7px", borderRadius: "100px",
-                            }}>🎁 FREE · ₹0.00</span>
+                            }}>🎁 FREE · ₹0</span>
                           </div>
                           <button onClick={removeFreeItem} style={{
                             width: 22, height: 22,
@@ -1630,7 +1627,7 @@ const Pricelist = () => {
                       <div style={{
                         background: "rgba(46,125,50,0.07)", border: `1.5px solid rgba(46,125,50,0.3)`,
                         borderRadius: "6px", padding: "5px 10px",
-                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.green, fontWeight: 600,
+                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.green, fontWeight: 400,
                       }}>
                         🎁 Lucky Spin unlocked! Spin to win a free gift at checkout.
                       </div>
@@ -1653,9 +1650,9 @@ const Pricelist = () => {
                     padding: "3px 8px",
                     background: "rgba(46,125,50,0.06)",
                     border: "1px solid rgba(46,125,50,0.25)", borderRadius: "4px",
-                    fontSize: "11px", color: C.green, fontFamily: "'Syne', sans-serif", fontWeight: 700,
+                    fontSize: "11px", color: C.green, fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                   }}>
-                    <span>🎁 Lucky Draw Gift</span><span>₹0.00</span>
+                    <span>🎁 Lucky Draw Gift</span><span>₹0</span>
                   </div>
                 )}
 
@@ -1781,7 +1778,7 @@ const Pricelist = () => {
                 <div style={{
                   display: "flex", justifyContent: "space-between",
                   fontSize: "11px", fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase",
+                  fontWeight: 400, letterSpacing: "0.1em", textTransform: "uppercase",
                   marginBottom: "1.25rem",
                 }}>
                   {["Budget", "Preferences", "Suggestions"].map((label, i) => (
@@ -1797,13 +1794,13 @@ const Pricelist = () => {
                         What's your total budget for fireworks?
                       </p>
                       <div style={{ position: "relative" }}>
-                        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: C.muted, fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>₹</span>
+                        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: C.muted, fontFamily: "'Barlow', sans-serif", fontWeight: 400 }}>₹</span>
                         <input type="number" value={aiBudget} onChange={e => setAiBudget(e.target.value)}
                           style={{
                             width: "100%", paddingLeft: 32, paddingRight: 14, paddingTop: 12, paddingBottom: 12,
                             border: `2px solid ${C.border}`, borderRadius: "4px",
-                            background: C.cream, fontFamily: "'Syne', sans-serif",
-                            fontWeight: 700, fontSize: "1.2rem", color: C.ink, outline: "none",
+                            background: C.cream, fontFamily: "'Barlow', sans-serif",
+                            fontWeight: 400, fontSize: "1.2rem", color: C.ink, outline: "none",
                           }}
                           placeholder="Enter amount" />
                       </div>
@@ -1868,8 +1865,9 @@ const Pricelist = () => {
                           {Object.entries(suggestedCart).map(([serial, qty]) => {
                             const product = products.find(p => p.serial_number === serial);
                             if (!product) return null;
-                            const discount = (product.price * product.discount) / 100;
-                            const priceAfterDiscount = formatPrice(product.price - discount);
+                            const origPr = roundPrice(product.price);
+                            const discAmt = (origPr * product.discount) / 100;
+                            const priceAfterDiscount = formatPrice(origPr - discAmt);
                             const imageSrc = Array.isArray(product.images) && product.images.length > 0
                               ? product.images.find(img => !img.includes("/video/")) || product.images[0]
                               : need;
@@ -1887,14 +1885,14 @@ const Pricelist = () => {
                                     fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "12px", color: C.ink,
                                     display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                                   }}>{product.productname}</p>
-                                  <p style={{ fontSize: "11px", color: C.crimson, marginTop: 2 }}>₹{priceAfterDiscount} × {qty}</p>
+                                  <p style={{ fontSize: "11px", color: C.crimson, marginTop: 2, fontWeight: 400 }}>₹{priceAfterDiscount} × {qty}</p>
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                                   <button onClick={() => removeFromSuggestedCart(product)} style={{
                                     width: 26, height: 26, background: C.parchment, border: `1px solid ${C.border}`,
                                     borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.crimson,
                                   }}><FaMinus style={{ fontSize: 9 }} /></button>
-                                  <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "13px", minWidth: 28, textAlign: "center" }}>{qty}</span>
+                                  <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "13px", minWidth: 28, textAlign: "center" }}>{qty}</span>
                                   <button onClick={() => addToSuggestedCart(product)} style={{
                                     width: 26, height: 26, background: C.parchment, border: `1px solid ${C.border}`,
                                     borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.crimson,
@@ -1956,13 +1954,13 @@ const Pricelist = () => {
 
           {(searchInput || brandSearchInput || selectedBrand !== "All") && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-              <span style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Filters:</span>
+              <span style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif", fontWeight: 400, letterSpacing: "0.1em", textTransform: "uppercase" }}>Filters:</span>
               {searchInput && (
                 <span style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   background: `rgba(192,57,43,0.08)`, border: `1px solid rgba(192,57,43,0.25)`,
                   color: C.crimson, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                 }}>
                   "{searchInput}"
                   <button onClick={clearSearch} style={{ background: "none", border: "none", cursor: "pointer", color: C.crimson, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
@@ -1973,7 +1971,7 @@ const Pricelist = () => {
                   display: "inline-flex", alignItems: "center", gap: 6,
                   background: `rgba(21,101,192,0.08)`, border: `1px solid rgba(21,101,192,0.25)`,
                   color: C.brand, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                 }}>
                   Brand: "{brandSearchInput}"
                   <button onClick={clearBrandSearch} style={{ background: "none", border: "none", cursor: "pointer", color: C.brand, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
@@ -1984,7 +1982,7 @@ const Pricelist = () => {
                   display: "inline-flex", alignItems: "center", gap: 6,
                   background: `rgba(21,101,192,0.08)`, border: `1px solid rgba(21,101,192,0.25)`,
                   color: C.brand, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                 }}>
                   <Tag style={{ width: 10, height: 10 }} /> {selectedBrand}
                   <button onClick={() => setSelectedBrand("All")} style={{ background: "none", border: "none", cursor: "pointer", color: C.brand, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
@@ -1995,7 +1993,7 @@ const Pricelist = () => {
                   display: "inline-flex", alignItems: "center", gap: 6,
                   background: `rgba(192,57,43,0.08)`, border: `1px solid rgba(192,57,43,0.25)`,
                   color: C.crimson, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 600,
+                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
                 }}>
                   {selectedType}
                   <button onClick={() => setSelectedType("All")} style={{ background: "none", border: "none", cursor: "pointer", color: C.crimson, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
@@ -2006,7 +2004,7 @@ const Pricelist = () => {
                 style={{
                   background: "none", border: "none", cursor: "pointer",
                   color: C.muted, fontSize: "12px", fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 600, textDecoration: "underline", padding: 0,
+                  fontWeight: 400, textDecoration: "underline", padding: 0,
                 }}>
                 Clear all
               </button>
@@ -2081,7 +2079,7 @@ const Pricelist = () => {
               </h2>
               <div style={{ flex: 1, height: "1px", background: `linear-gradient(to right, ${C.border}, transparent)` }} />
               <span style={{
-                fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: "11px",
+                fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "11px",
                 letterSpacing: "0.15em", textTransform: "uppercase", color: C.crimson,
                 background: `rgba(192,57,43,0.07)`, border: `1px solid rgba(192,57,43,0.2)`,
                 padding: "4px 12px", borderRadius: "100px",
@@ -2239,7 +2237,7 @@ const Pricelist = () => {
                             <span style={{ textDecoration: "line-through", color: C.muted, fontSize: "10px", fontFamily: "'Barlow', sans-serif" }}>
                               ₹{formatPrice(freeCartItem.price || 0)}
                             </span>
-                            <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, color: C.green, fontSize: "13px" }}>₹0.00</span>
+                            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 400, color: C.green, fontSize: "13px" }}>₹0</span>
                           </div>
                         </div>
                         <p style={{
