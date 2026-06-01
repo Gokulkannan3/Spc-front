@@ -1273,13 +1273,18 @@ const Pricelist = () => {
 
   return (
     <>
+      
       {cartItemCount > 0 && (
         <MinPurchasePipeline
           subtotalRaw={totals.subtotalRaw}
           onCartOpen={() => setIsCartOpen(true)}
           isUnlocked={isCartUnlocked}
         />
-      )}
+      )} 
+      
+      <div>
+        <Navbar/>
+      </div>
 
       <ToasterNotification show={showToaster} onClose={() => setShowToaster(false)} />
       <SuccessAnimation show={showSuccess} onDismiss={() => setShowSuccess(false)} />
