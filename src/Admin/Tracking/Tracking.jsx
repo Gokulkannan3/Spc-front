@@ -40,7 +40,6 @@ const PaginBtn = ({ label, onClick, disabled, active }) => (
   </button>
 );
 
-// FIXED: Moved outside Tracking component so it's stable across renders
 const ModalWrapper = ({ children }) => (
   <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl">
@@ -55,6 +54,7 @@ export default function Tracking() {
   const [bookings, setBookings] = useState([]);
   const [filterCustomerType, setFilterCustomerType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,7 +73,6 @@ export default function Tracking() {
   const amountPaidRef = useRef(null);
   const transactionIdRef = useRef(null);
 
-  // FIXED: only fires when modal opens, not on every re-render
   useEffect(() => {
     if (showDetailsModal) {
       setTimeout(() => {
@@ -347,17 +346,36 @@ export default function Tracking() {
     }
   };
 
-  const filteredBookings = bookings.filter((booking) =>
-    ['customer_name', 'order_id', 'total', 'customer_type'].some((key) =>
+  const getISTDateString = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date)) return '';
+    const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+    const istDate = new Date(utc + 3600000 * 5.5);
+    return `${istDate.getFullYear()}-${String(istDate.getMonth() + 1).padStart(2, '0')}-${String(istDate.getDate()).padStart(2, '0')}`;
+  };
+
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesSearch = ['customer_name', 'order_id', 'total', 'customer_type'].some((key) =>
       booking[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+    );
+
+    let matchesDate = true;
+    if (filterDate) {
+      const bookingISTDate = getISTDateString(booking.created_at);
+      matchesDate = bookingISTDate === filterDate;
+    }
+
+    return matchesSearch && matchesDate;
+  });
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
     if (isNaN(date)) return 'N/A';
-    return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+    const istDate = new Date(utc + 3600000 * 5.5);
+    return `${String(istDate.getDate()).padStart(2, '0')}-${String(istDate.getMonth() + 1).padStart(2, '0')}-${istDate.getFullYear()}`;
   };
 
   const indexOfLastOrder = currentPage * ordersPerPage;
@@ -402,6 +420,15 @@ export default function Tracking() {
                   <option value="Customer of Selected Agent">Customer of Selected Agent</option>
                   <option value="User">User</option>
                 </select>
+              </div>
+              <div className="flex-1 min-w-48">
+                <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Date</label>
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className={selectStyles}
+                />
               </div>
               <div className="flex-1 min-w-64">
                 <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Search</label>
@@ -464,18 +491,20 @@ export default function Tracking() {
                     </a>
                   )}
 
-                  <div className="mb-3">
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Update Status</label>
-                    <select
-                      value={booking.status}
-                      onChange={(e) => handleStatusChange(booking.id, e.target.value, booking.total)}
-                      className={selectStyles}
-                    >
-                      <option value="">— Change Status —</option>
-                      <option value="booked">Booked</option>
-                      <option value="paid">Paid</option>
-                    </select>
-                  </div>
+                  {booking.status?.toLowerCase() === 'booked' && (
+                    <div className="mb-3">
+                      <label className="block text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Update Status</label>
+                      <select
+                        value={booking.status}
+                        onChange={(e) => handleStatusChange(booking.id, e.target.value, booking.total)}
+                        className={selectStyles}
+                      >
+                        <option value="">— Change Status —</option>
+                        <option value="booked">Booked</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="flex gap-2">
                     <button
@@ -512,7 +541,6 @@ export default function Tracking() {
         </div>
       </div>
 
-      {/* Paid Confirmation Modal */}
       {showPaidModal && (
         <ModalWrapper>
           <div className="text-5xl mb-4 text-center">💰</div>
@@ -525,7 +553,6 @@ export default function Tracking() {
         </ModalWrapper>
       )}
 
-      {/* Payment Details Modal */}
       {showDetailsModal && (
         <ModalWrapper>
           <h2 className="text-xl font-extrabold text-slate-800 mb-6 text-center">💳 Payment Details</h2>
@@ -590,7 +617,10 @@ export default function Tracking() {
 
           <div className="flex gap-2.5 justify-end mt-6">
             <button
-              onClick={() => setShowDetailsModal(false)}
+              onClick={() => {
+                setShowDetailsModal(false);
+                fetchBookings(false);
+              }}
               className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 font-semibold text-sm hover:bg-slate-50 transition-colors"
             >
               Cancel
@@ -605,7 +635,6 @@ export default function Tracking() {
         </ModalWrapper>
       )}
 
-      {/* Download Modal */}
       {showDownloadModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
@@ -621,7 +650,6 @@ export default function Tracking() {
         </div>
       )}
 
-      {/* Delete Modal */}
       {showDeleteModal && (
         <ModalWrapper>
           <div className="text-5xl mb-4 text-center">⚠️</div>

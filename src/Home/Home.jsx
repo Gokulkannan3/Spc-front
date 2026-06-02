@@ -763,7 +763,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{opacity:0,x:-40}} whileInView={{opacity:1,x:0}} transition={{duration:0.7}} viewport={{once:true}} className="relative">
               <div className="relative rounded-lg overflow-hidden" style={{border:`2px solid ${C.borderD}`}}>
-                <img src={about||"/placeholder.svg"} alt="Madhu Nisha Crackers" className="w-full h-96 object-cover" style={{display:"block"}}/>
+                <img src={about||"/placeholder.svg"} alt="Sree Palaniyappa Crackers" className="w-full h-96 object-cover" style={{display:"block"}}/>
                 <div className="absolute inset-0" style={{background:"linear-gradient(135deg,rgba(192,57,43,0.06) 0%,transparent 60%)"}}/>
               </div>
               <div className="absolute -bottom-4 -right-4 w-full h-full rounded-lg -z-10"

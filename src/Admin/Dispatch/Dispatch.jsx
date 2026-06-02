@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { FaDownload, FaSearch } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -28,6 +28,8 @@ const statusColors = {
 export default function Dispatch() {
   const [bookings, setBookings] = useState([]);
   const [filterStatus, setFilterStatus] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,7 +66,7 @@ export default function Dispatch() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterStatus]);
+  }, [filterStatus, startDate, endDate]);
 
   const handleStatusChange = (id, newStatus) => {
     if (newStatus === 'dispatched') {
@@ -90,9 +92,10 @@ export default function Dispatch() {
         payload
       );
 
-      // Update local state
       const updated = response.data?.data || {};
       setBookings(prev => prev.map(b => b.id === id ? { ...b, ...updated, status: newStatus } : b ));
+      setSuccessMessage('Status updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
 
     } catch (err) {
       console.error(err);
@@ -279,11 +282,22 @@ export default function Dispatch() {
     setDownloadTarget(null);
   };
 
-  const filteredBookings = bookings.filter(b =>
-    ['customer_name', 'order_id', 'total'].some(key =>
-      b[key]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  const filteredBookings = useMemo(() => {
+    return bookings.filter(b => {
+      const matchesSearch = ['customer_name', 'order_id', 'total'].some(key =>
+        b[key]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      const bookingDate = new Date(b.created_at || b.date).setHours(0, 0, 0, 0);
+      const start = startDate ? new Date(startDate).setHours(0, 0, 0, 0) : null;
+      const end = endDate ? new Date(endDate).setHours(0, 0, 0, 0) : null;
+      const matchesDate = (!start || bookingDate >= start) && (!end || bookingDate <= end);
+
+      const matchesStatus = filterStatus ? b.status === filterStatus : true;
+
+      return matchesSearch && matchesDate && matchesStatus;
+    });
+  }, [bookings, searchQuery, startDate, endDate, filterStatus]);
 
   const totalPages = Math.ceil(filteredBookings.length / ordersPerPage);
   const currentOrders = filteredBookings.slice(
@@ -306,10 +320,9 @@ export default function Dispatch() {
           {error && <div className="bg-red-50 border border-red-200 border-l-4 border-l-red-500 text-red-700 px-4 py-3.5 rounded-xl mb-5 text-sm font-medium">⚠️ {error}</div>}
           {successMessage && <div className="bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 text-emerald-800 px-4 py-3.5 rounded-xl mb-5 text-sm font-medium">✓ {successMessage}</div>}
 
-          {/* Filters */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-5 mb-6">
-            <div className="flex flex-wrap gap-3 items-end">
-              <div className="min-w-44">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+              <div>
                 <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Status</label>
                 <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={inputCls}>
                   <option value="">All Statuses</option>
@@ -318,7 +331,18 @@ export default function Dispatch() {
                   ))}
                 </select>
               </div>
-              <div className="min-w-64 flex-1">
+
+              <div>
+                <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">From Date</label>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={inputCls} />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">To Date</label>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={inputCls} />
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-1.5">Search</label>
                 <div className="relative">
                   <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
@@ -332,9 +356,13 @@ export default function Dispatch() {
                 </div>
               </div>
             </div>
+            {(startDate || endDate || filterStatus || searchQuery) && (
+              <button onClick={() => { setStartDate(''); setEndDate(''); setFilterStatus(''); setSearchQuery(''); }} className="mt-3 text-xs font-bold text-red-500 hover:underline block">
+                Clear Filters
+              </button>
+            )}
           </div>
 
-          {/* Orders Grid */}
           {currentOrders.length === 0 ? (
             <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl mb-6">
               <div className="text-4xl mb-3">📦</div>
@@ -372,7 +400,6 @@ export default function Dispatch() {
                     ))}
                   </div>
 
-                  {/* Transport details — shown when dispatched */}
                   {booking.status === 'dispatched' && booking.transport_name && (
                     <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2.5 mb-3 space-y-1">
                       <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">🚚 Transport Info</p>
@@ -385,11 +412,31 @@ export default function Dispatch() {
                   )}
 
                   <div className="flex flex-col gap-2">
-                    <select value={booking.status} onChange={e => handleStatusChange(booking.id, e.target.value)} className={inputCls}>
+                    <select 
+                      value={booking.status} 
+                      onChange={e => handleStatusChange(booking.id, e.target.value)} 
+                      className={inputCls}
+                    >
                       <option value="" disabled>Update Status</option>
-                      {['paid', 'packed', 'dispatched', 'delivered'].map(s => (
-                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                      ))}
+                      {[
+                        { value: 'paid', label: 'Paid', level: 1 },
+                        { value: 'packed', label: 'Packed', level: 2 },
+                        { value: 'dispatched', label: 'Dispatched', level: 3 },
+                        { value: 'delivered', label: 'Delivered', level: 4 }
+                      ].map(s => {
+                        const currentLevels = { paid: 1, packed: 2, dispatched: 3, delivered: 4 };
+                        const currentLevel = currentLevels[booking.status] || 0;
+                        
+                        return (
+                          <option 
+                            key={s.value} 
+                            value={s.value} 
+                            disabled={s.level < currentLevel || booking.status === 'delivered'}
+                          >
+                            {s.label}
+                          </option>
+                        );
+                      })}
                     </select>
                     <button onClick={() => handleDownloadClick(booking)}
                       className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 transition-all duration-200">
@@ -401,7 +448,6 @@ export default function Dispatch() {
             </div>
           )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center gap-1.5 flex-wrap">
               <PaginBtn label="← Prev" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} />
@@ -416,7 +462,6 @@ export default function Dispatch() {
         </div>
       </div>
 
-      {/* Download Modal */}
       {showDownloadModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
@@ -438,7 +483,6 @@ export default function Dispatch() {
         </div>
       )}
 
-      {/* Transport Details Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">

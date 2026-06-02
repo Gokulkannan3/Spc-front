@@ -668,10 +668,10 @@ const Pricelist = () => {
     let yOffset = 20;
     doc.setFontSize(16); doc.setFont('helvetica', 'bold');
     doc.setTextColor(192, 57, 43);
-    doc.text('MADHU NISHA CRACKERS', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('SREE PALANIYAPPA CRACKERS', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 10;
     doc.setFontSize(12); doc.setFont('helvetica', 'normal'); doc.setTextColor(70, 70, 70);
-    doc.text('Website - www.madhunishacrackers.com', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('Website - www.palaniyappacrackers.com', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 8;
     doc.text('Retail Pricelist - 2025', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 8;
@@ -758,7 +758,7 @@ const Pricelist = () => {
       }
       yOffset += 6;
     }
-    doc.save('MNC_Pricelist_2025.pdf');
+    doc.save('SPC_Pricelist_2025.pdf');
   }, [products]);
 
   useEffect(() => {
