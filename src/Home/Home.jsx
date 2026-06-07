@@ -671,23 +671,60 @@ export default function Home() {
           </div>
 
           {/* Banner */}
-          <div className="relative rounded-t-2xl overflow-hidden"
-            style={{height:"clamp(180px,40vw,520px)",border:`2px solid ${C.borderD}`,borderBottom:"none",boxShadow:`6px 6px 0 ${C.crimson}`}}>
+          <div 
+            className="relative rounded-t-2xl overflow-hidden w-full"
+            style={{
+              height: "clamp(200px, 45vw, 400px)", 
+              border: `2px solid ${C.borderD}`,
+              borderBottom: "none",
+              boxShadow: `6px 6px 0 ${C.crimson}`,
+              maxWidth: "100%"
+            }}
+          >
             <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded font-bold text-sm"
-              style={{background:C.crimson,color:"#fff",fontFamily:"'Syne',sans-serif",letterSpacing:"0.1em"}}>SPC</div>
+              style={{background: C.crimson, color: "#fff", fontFamily: "'Syne', sans-serif", letterSpacing: "0.1em"}}>
+              SPC
+            </div>
+
             <AnimatePresence mode="wait">
-              {banners.map((b,i)=>slide===i&&(
-                <motion.div key={b.id} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:0.9}} className="absolute inset-0">
-                  <img src={b.image_url.startsWith("http")?b.image_url:`${API_BASE_URL}${b.image_url}`} alt={`Banner ${b.id}`} className="w-full h-full object-cover"/>
-                  <div className="absolute inset-0" style={{background:"linear-gradient(to right,rgba(28,28,30,0.3) 0%,transparent 60%)"}}/>
+              {banners.map((b, i) => slide === i && (
+                <motion.div 
+                  key={b.id} 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  exit={{ opacity: 0 }} 
+                  transition={{ duration: 0.9 }} 
+                  className="absolute inset-0"
+                >
+                  <img 
+                    src={b.image_url.startsWith("https") ? b.image_url : `${API_BASE_URL}${b.image_url}`} 
+                    alt={`Banner ${b.id}`} 
+                    className="w-full h-full object-contain bg-[#f5e9c9]"   // ← Changed to contain
+                    style={{ 
+                      display: "block",
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      margin: "0 auto"
+                    }}
+                  />
+                  <div className="absolute inset-0" 
+                    style={{background: "linear-gradient(to right, rgba(28,28,30,0.35) 0%, transparent 65%)"}}/>
                 </motion.div>
               ))}
             </AnimatePresence>
-            {banners.length>1&&(
-              <div className="absolute bottom-5 right-6 flex gap-2">
-                {banners.map((_,i)=>(
-                  <button key={i} onClick={()=>setSlide(i)} className="h-2 rounded-full transition-all"
-                    style={{width:i===slide?"32px":"8px",background:i===slide?C.crimson:"rgba(255,255,255,0.5)"}}/>
+
+            {banners.length > 1 && (
+              <div className="absolute bottom-5 right-6 flex gap-2 z-10">
+                {banners.map((_, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => setSlide(i)} 
+                    className="h-2 rounded-full transition-all"
+                    style={{
+                      width: i === slide ? "32px" : "8px",
+                      background: i === slide ? C.crimson : "rgba(255,255,255,0.5)"
+                    }}
+                  />
                 ))}
               </div>
             )}
