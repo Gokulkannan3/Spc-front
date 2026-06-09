@@ -28,7 +28,7 @@ export default function Login() {
       }
 
       localStorage.setItem('username', data.username);
-      navigate('/inventory');
+      navigate('/tracking');
     } catch (err) {
       setError(err.message);
     }

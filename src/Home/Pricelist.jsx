@@ -199,7 +199,6 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
   );
 });
 MinPurchasePipeline.displayName = "MinPurchasePipeline";
-
 const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onImageClick }) => {
   const originalPrice = roundPrice(product.price);
   const discount = originalPrice * (product.discount / 100);
@@ -340,6 +339,84 @@ const SPIN_COLORS = [
   C.crimsonD, "#6a1b9a", "#00838f", "#bf360c",
 ];
 
+// ─── Cracker Burst Animation Helper ──────────────────────────────────────────
+function launchCrackerBurst(originEl) {
+  if (!originEl) return;
+  const rect = originEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const CRACKER_COLORS = [
+    "#ff2a2a", "#ff9f43", "#f1c40f", "#2ecc71", 
+    "#3498db", "#9b59b6", "#ff007f", "#00ffff"
+  ];
+
+  function spawnBurstShell(particleCount, baseSpeed, sparkRadius, delay) {
+    setTimeout(() => {
+      for (let i = 0; i < particleCount; i++) {
+        const el = document.createElement("div");
+        const color = CRACKER_COLORS[Math.floor(Math.random() * CRACKER_COLORS.length)];
+        const size = 5 + Math.random() * 6;
+        
+        // Circular explosion physics vectors
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = (0.4 + Math.random() * 0.6) * baseSpeed;
+        const dx = Math.cos(angle) * speed;
+        const dy = Math.sin(angle) * speed - (Math.random() * 40); // slight upward rocket bias
+        
+        const rotation = Math.random() * 360;
+        const duration = 0.6 + Math.random() * 0.5;
+
+        el.style.cssText = `
+          position: fixed;
+          left: ${cx}px;
+          top: ${cy}px;
+          width: ${size}px;
+          height: ${size}px;
+          background: ${color};
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 99999;
+          box-shadow: 0 0 8px ${color}, 0 0 14px #fff;
+          opacity: 1;
+          transition:
+            left ${duration}s cubic-bezier(0.1, 0.8, 0.25, 1),
+            top ${duration}s cubic-bezier(0.1, 0.8, 0.25, 1),
+            transform ${duration}s ease-out,
+            opacity ${duration}s cubic-bezier(0.8, 0, 1, 1);
+        `;
+        document.body.appendChild(el);
+
+        // Execute render cycle pipeline animation
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.left = `${cx + dx}px`;
+            el.style.top = `${cy + dy}px`;
+            el.style.transform = `rotate(${rotation}deg) scale(0.1)`;
+            el.style.opacity = "0";
+            setTimeout(() => el.remove(), duration * 1000);
+          });
+        });
+      }
+    }, delay);
+  }
+
+  // 💥 Multi-shell aerial repeater sequence simulation
+  spawnBurstShell(60, 240, 150, 0);   // Primary Central Core Break
+  spawnBurstShell(40, 340, 220, 150); // Secondary Wide Ring Outbreak
+  spawnBurstShell(35, 160, 100, 350); // Tertiary Crackling Willow Finish
+}
+
+// ─── Dynamic Font Allocation Utility ─────────────────────────────────────────
+function getDynamicWheelFontSize(labelLength, segmentCount) {
+  // Scales beautifully according to wedge density constraints
+  let baseSize = segmentCount > 6 ? 13 : 15;
+  if (labelLength > 15) baseSize -= 2;
+  if (labelLength > 22) baseSize -= 1.5;
+  return Math.max(9.5, baseSize);
+}
+
+// ─── Main Lucky Spin Component ────────────────────────────────────────────────
 const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, onSkip, alreadyHasFree }) => {
   const canvasRef = useRef(null);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -349,56 +426,88 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
 
   const segments = useMemo(() => {
     if (!freeProducts || freeProducts.length === 0) return [];
-    return freeProducts.slice(0, 8);
+    return freeProducts.slice(0, 8); // Handles custom configurations up to 8 items smoothly
   }, [freeProducts]);
 
   const drawWheel = useCallback((rot = 0) => {
     const canvas = canvasRef.current;
     if (!canvas || segments.length === 0) return;
     const ctx = canvas.getContext("2d");
+    
+    // Support modern High-DPI Retina Displays safely
     const size = canvas.width;
-    const cx = size / 2, cy = size / 2, r = size / 2 - 6;
+    const cx = size / 2, cy = size / 2, r = size / 2 - 8;
     const count = segments.length;
     const arc = (2 * Math.PI) / count;
+    
     ctx.clearRect(0, 0, size, size);
+    
+    // Outer Border Lip Rings
     ctx.beginPath();
-    ctx.arc(cx, cy, r + 4, 0, 2 * Math.PI);
+    ctx.arc(cx, cy, r + 6, 0, 2 * Math.PI);
     ctx.fillStyle = C.parchment;
     ctx.fill();
+
     for (let i = 0; i < count; i++) {
       const start = rot + i * arc - Math.PI / 2;
       const end = start + arc;
+      
+      // Draw Wedge Slice
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, r, start, end);
       ctx.closePath();
       ctx.fillStyle = SPIN_COLORS[i % SPIN_COLORS.length];
       ctx.fill();
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2.5;
       ctx.stroke();
+
+      // Render Enhanced Scalable Typography Text Labels
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(start + arc / 2);
       ctx.textAlign = "right";
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 10px 'Syne', sans-serif";
-      const label = (segments[i]?.productname || `Prize ${i + 1}`).substring(0, 13);
-      ctx.fillText(label, r - 12, 4);
+      ctx.fillStyle = "#ffffff";
+      
+      const rawLabel = segments[i]?.productname || `Gift ${i + 1}`;
+      const cleanLabel = rawLabel.substring(0, 28); // Cap cleanly to prevent layout overflows
+      
+      const fontSize = getDynamicWheelFontSize(cleanLabel.length, count);
+      ctx.font = `bold ${fontSize}px 'Syne', sans-serif`;
+      ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+      ctx.shadowBlur = 4;
+
+      const words = cleanLabel.split(" ");
+      // Check if text needs line-wrapping for maximum legibility
+      if (words.length >= 2 && cleanLabel.length > 11) {
+        const mid = Math.ceil(words.length / 2);
+        const firstLine = words.slice(0, mid).join(" ");
+        const secondLine = words.slice(mid).join(" ");
+        const lineSpacing = fontSize + 3;
+        
+        ctx.fillText(firstLine, r - 16, -lineSpacing / 2 + 3);
+        ctx.fillText(secondLine, r - 16, lineSpacing / 2 + 3);
+      } else {
+        ctx.fillText(cleanLabel, r - 16, fontSize / 3);
+      }
       ctx.restore();
     }
+
+    // Centered Wheel Hub Cap Pin Button
     ctx.beginPath();
-    ctx.arc(cx, cy, 26, 0, 2 * Math.PI);
-    ctx.fillStyle = "#fff";
+    ctx.arc(cx, cy, 30, 0, 2 * Math.PI);
+    ctx.fillStyle = "#ffffff";
     ctx.fill();
     ctx.strokeStyle = C.crimson;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 3.5;
     ctx.stroke();
     ctx.fillStyle = C.crimson;
-    ctx.font = "bold 9px 'Syne', sans-serif";
+    ctx.font = "bold 10px 'Syne', sans-serif";
+    ctx.shadowBlur = 0; // reset shadow filter rules context
     ctx.textAlign = "center";
     ctx.fillText("SPIN", cx, cy - 2);
-    ctx.fillText("WIN!", cx, cy + 10);
+    ctx.fillText("WIN!", cx, cy + 11);
   }, [segments]);
 
   useEffect(() => {
@@ -406,7 +515,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
       setResult(null);
       setIsSpinning(false);
       setCurrentRotation(0);
-      setTimeout(() => drawWheel(0), 80);
+      setTimeout(() => drawWheel(0), 100);
     }
   }, [isOpen, drawWheel]);
 
@@ -414,26 +523,33 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
     if (isSpinning || segments.length === 0) return;
     setIsSpinning(true);
     setResult(null);
+    
     const count = segments.length;
     const arc = (2 * Math.PI) / count;
     const winIndex = Math.floor(Math.random() * count);
-    const targetAngle = -(winIndex * arc) - (arc / 2) + (Math.PI * 2 * 5);
-    const totalSpin = targetAngle + (Math.random() * 0.3 - 0.15);
-    const duration = 4200;
+    
+    const targetAngle = -(winIndex * arc) - (arc / 2) + (Math.PI * 2 * 6); // 6 full clean rotations
+    const totalSpin = targetAngle + (Math.random() * 0.25 - 0.125); // randomized landing offsets
+    const duration = 4400;
     const startTime = performance.now();
     const startRot = currentRotation;
+    
     const animate = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 4);
+      const ease = 1 - Math.pow(1 - progress, 4); // Quartic ease-out velocity profile
       const rot = startRot + totalSpin * ease;
+      
       setCurrentRotation(rot);
       drawWheel(rot);
+      
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
         setIsSpinning(false);
         setResult(segments[winIndex]);
+        // 🎇 Trigger the customized high-fidelity firecracker burst explosion!
+        launchCrackerBurst(canvasRef.current);
       }
     };
     animFrameRef.current = requestAnimationFrame(animate);
@@ -468,7 +584,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
           style={{
             background: C.ivory, border: `2px solid ${C.crimson}`,
             borderRadius: "10px", boxShadow: `10px 10px 0 ${C.crimsonD}`,
-            maxWidth: "22rem", width: "100%", padding: "1.75rem",
+            maxWidth: "24rem", width: "100%", padding: "1.75rem",
             fontFamily: "'Barlow', sans-serif", overflow: "hidden",
           }}
         >
@@ -499,6 +615,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
               }}>Only 1 free product per order is allowed</div>
             )}
           </div>
+          
           {!alreadyHasFree && (
             <div style={{ position: "relative", display: "flex", justifyContent: "center", marginBottom: "1.25rem" }}>
               <div style={{
@@ -508,13 +625,16 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
                 borderTop: `22px solid ${C.crimson}`,
                 zIndex: 2, filter: `drop-shadow(0 2px 4px ${C.crimsonD}66)`,
               }} />
-              <canvas ref={canvasRef} width={220} height={220} style={{
+              {/* Increased size dimensions to 260px to provide larger structural landscape layout */}
+              <canvas ref={canvasRef} width={260} height={260} style={{
                 borderRadius: "50%", border: `3px solid ${C.crimson}`,
                 boxShadow: `0 0 0 5px ${C.parchment}, 0 0 0 7px ${C.border}`,
                 display: "block",
+                width: "240px", height: "240px"
               }} />
             </div>
           )}
+          
           <AnimatePresence>
             {result && (
               <motion.div
@@ -540,6 +660,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
               </motion.div>
             )}
           </AnimatePresence>
+          
           <div style={{ display: "flex", gap: 10 }}>
             <button onClick={onSkip} style={{
               flex: 1, padding: "10px 0", background: "transparent", color: C.crimson,
@@ -622,6 +743,7 @@ const Pricelist = () => {
     kids: false, sound: false, night: false, kidsnight: false,
   });
   const [suggestedCart, setSuggestedCart] = useState({});
+  const typeScrollRef = useRef(null);
 
   const handleSearchInputChange = useCallback((e) => {
     const val = e.target.value;
@@ -2046,14 +2168,68 @@ const Pricelist = () => {
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "1.25rem" }}>
           <p className="label" style={{ marginBottom: "0.5rem" }}>Category</p>
-          <div className="hscroll" style={{ display: "flex", gap: "12px", overflowX: "auto", padding: "4px 0 8px", scrollbarWidth: "thin" }}>
-            {productTypes.map(type => (
-              <motion.button key={type} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
-                onClick={() => setSelectedType(type)}
-                className={`type-chip ${selectedType === type ? "active" : ""}`}>
-                {type}
-              </motion.button>
-            ))}
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+
+            {/* Left arrow — desktop only */}
+            <button
+              className="hidden lg:flex"
+              onClick={() => typeScrollRef.current?.scrollBy({ left: -240, behavior: "smooth" })}
+              style={{
+                flexShrink: 0,
+                width: 34, height: 34,
+                background: "#fff",
+                border: `1.5px solid ${C.border}`,
+                borderRadius: "50%",
+                cursor: "pointer",
+                alignItems: "center",
+                justifyContent: "center",
+                color: C.crimson,
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.crimson; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = C.crimson; }}
+            >
+              <FaArrowLeft style={{ fontSize: 11 }} />
+            </button>
+
+            {/* Scrollable chips */}
+            <div
+              ref={typeScrollRef}
+              className="hscroll"
+              style={{ display: "flex", gap: "12px", overflowX: "auto", padding: "4px 0 8px", scrollbarWidth: "thin", flex: 1 }}
+            >
+              {productTypes.map(type => (
+                <motion.button key={type} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+                  onClick={() => setSelectedType(type)}
+                  className={`type-chip ${selectedType === type ? "active" : ""}`}>
+                  {type}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Right arrow — desktop only */}
+            <button
+              className="hidden lg:flex"
+              onClick={() => typeScrollRef.current?.scrollBy({ left: 240, behavior: "smooth" })}
+              style={{
+                flexShrink: 0,
+                width: 34, height: 34,
+                background: "#fff",
+                border: `1.5px solid ${C.border}`,
+                borderRadius: "50%",
+                cursor: "pointer",
+                alignItems: "center",
+                justifyContent: "center",
+                color: C.crimson,
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.crimson; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = C.crimson; }}
+            >
+              <FaArrowRight style={{ fontSize: 11 }} />
+            </button>
+
           </div>
         </motion.div>
 

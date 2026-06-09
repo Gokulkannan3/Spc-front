@@ -69,7 +69,7 @@ export default function Tracking() {
   const [amountPaid, setAmountPaid] = useState('');
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadTarget, setDownloadTarget] = useState(null);
-  const ordersPerPage = 9;
+  const ordersPerPage = 12;
   const amountPaidRef = useRef(null);
   const transactionIdRef = useRef(null);
 

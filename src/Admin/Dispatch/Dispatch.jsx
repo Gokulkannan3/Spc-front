@@ -39,7 +39,7 @@ export default function Dispatch() {
   const [transportDetails, setTransportDetails] = useState({ transportName: '', lrNumber: '', transportContact: '' });
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadTarget, setDownloadTarget] = useState(null);
-  const ordersPerPage = 9;
+  const ordersPerPage = 10;
 
   useEffect(() => {
     const fetchBookings = async () => {

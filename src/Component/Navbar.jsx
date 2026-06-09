@@ -147,7 +147,7 @@ export default function Navbar() {
       )}
 
       {/* ── MOBILE VERTICAL STACK FAB ─────────────────────────────── */}
-      <div className="lg:hidden">
+      <div className={isPriceListPage ? undefined : "lg:hidden"}>
         {/* Scrim */}
         <AnimatePresence>
           {mobileOpen && (
@@ -330,7 +330,7 @@ export default function Navbar() {
       </div>
 
       {/* Spacer */}
-      <div className="h-24 lg:h-0" />
+      <div className={isPriceListPage ? "h-0" : "h-24 lg:h-0"} />
     </>
   )
 }
