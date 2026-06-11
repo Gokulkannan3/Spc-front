@@ -35,13 +35,13 @@ const C = {
 const MIN_PURCHASE = 2000;
 
 const GLOBAL_STYLES_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&;400;500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; }
-  body { background: ${C.ivory}; color: ${C.ink}; font-family: 'Barlow', sans-serif; }
+  body { background: ${C.ivory}; color: ${C.ink}; sans-serif; }
   .display { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
   .serif { font-family: 'Lora', serif; }
-  .label { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: ${C.crimson}; }
-  .pill { display:inline-flex; align-items:center; gap:6px; background:${C.crimson}; color:#fff; font-family:'Barlow',sans-serif; font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
+  .label { sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: ${C.crimson}; }
+  .pill { display:inline-flex; align-items:center; gap:6px; background:${C.crimson}; color:#fff;font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
   .pill-saffron { background:${C.saffron}; color:#fff; }
   .pill-green { background:${C.green}; color:#fff; }
   .pill-brand { background:${C.brand}; color:#fff; }
@@ -58,7 +58,7 @@ const GLOBAL_STYLES_CSS = `
   @keyframes marquee { 0% { transform:translateX(100%); } 100% { transform:translateX(-100%); } }
   .animate-marquee { display:inline-block; animation:marquee 18s linear infinite; white-space:nowrap; }
   .search-input-group { position:relative; }
-  .search-input-group input { width:100%; padding:11px 14px 11px 40px; border:1.5px solid ${C.border}; border-radius:4px; background:#fff; font-family:'Barlow',sans-serif; font-size:14px; color:${C.ink}; outline:none; transition:border-color 0.2s; }
+  .search-input-group input { width:100%; padding:11px 14px 11px 40px; border:1.5px solid ${C.border}; border-radius:4px; background:#fff; font-size:14px; color:${C.ink}; outline:none; transition:border-color 0.2s; }
   .search-input-group input:focus { border-color:${C.crimson}; }
   .search-input-group .icon { position:absolute; left:13px; top:50%; transform:translateY(-50%); pointer-events:none; }
   .product-card-selected { background: ${C.selectedBg} !important; border-color: ${C.selectedBorder} !important; }
@@ -149,20 +149,20 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
               🎉 Cart!
             </span>
           ) : (
-            <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "18px" }}>
+            <span style={{ fontWeight: 1000, fontSize: "18px" }}>
               Add ₹{formatPrice(remaining)} more to open cart
             </span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "20px" }}>
+          <span style={{ fontWeight: 1000, fontSize: "20px" }}>
             ₹{formatPrice(subtotalRaw)}
             <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.7 }}> / ₹{MIN_PURCHASE}</span>
           </span>
           {isUnlocked && (
             <span style={{
               background: "rgba(255,255,255,0.2)", borderRadius: "4px",
-              padding: "2px 10px", fontSize: "12px", fontFamily: "'Barlow', sans-serif",
+              padding: "2px 10px", fontSize: "12px",
               fontWeight: 400,
             }}>View Cart →</span>
           )}
@@ -266,64 +266,71 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
           <FaInfoCircle style={{ color: C.crimson, fontSize: 13 }} />
         </button>
       </div>
-      <div style={{ padding: "1rem", background: isSelected ? C.selectedBg : "transparent", transition: "background 0.3s" }}>
+      {/* 1. Update card content padding from 1rem to a fluid responsive padding */}
+      <div className="p-5" style={{ background: isSelected ? C.selectedBg : "transparent", transition: "background 0.3s" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: "10px", color: C.muted, letterSpacing: "0.1em" }}>
+          <p style={{ fontSize: "10px", color: C.muted, letterSpacing: "0.1em" }}>
             {product.serial_number}
           </p>
           {product.brand && (
             <span style={{
-              fontSize: "10px", color: C.brand, fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-              background: `rgba(21,101,192,0.08)`, padding: "1px 7px", borderRadius: "100px",
+              fontSize: "9px", color: C.brand, fontWeight: 400,
+              background: `rgba(21,101,192,0.08)`, padding: "1px 5px", borderRadius: "100px",
             }}>{product.brand}</span>
           )}
         </div>
+        
+        {/* 2. Adjust heading text size fluidly so long firecracker names don't crowd lines */}
         <h3 style={{
-          fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "13px", color: C.ink,
-          marginBottom: "0.6rem", display: "-webkit-box", WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.35,
-        }}>{product.productname}</h3>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: "0.75rem" }}>
+          fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", color: C.ink,
+          marginBottom: "0.4rem", display: "-webkit-box", WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.25,
+        }} className="font-bold">{product.productname}</h3>
+        
+        {/* 3. Wrap price metrics safely */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "4px 6px", marginBottom: "0.75rem" }}>
           {product.discount > 0 && (
-            <span style={{ fontSize: "18px", color: C.muted, textDecoration: "line-through", fontWeight: 1000 }}>
+            <span style={{ fontSize: "13px", color: C.muted, textDecoration: "line-through", fontWeight: 700 }}>
               ₹{formatPrice(originalPrice)}
             </span>
           )}
-          <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 1000, fontSize: "1.25rem", color: C.crimson }}>₹{finalPrice}</span>
-          <span style={{ fontSize: "11px", color: C.muted }}>/{product.per}</span>
+          <span style={{ fontWeight: 1000, fontSize: "1.1rem", color: C.crimson }}>₹{finalPrice}</span>
+          <span style={{ fontSize: "10px", color: C.muted }}>/{product.per}</span>
         </div>
-        <div className="flex justify-end">
-          <AnimatePresence mode="wait" style={{display: "flex", justifyContent: "end"}}>
+        
+        {/* 4. Let interactive controls grow full width instead of half-width on tiny columns */}
+        <div className="flex justify-end w-full">
+          <AnimatePresence mode="wait" style={{display: "flex", justifyContent: "end", width: "100%"}}>
             {count > 0 ? (
               <motion.div key="qty" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  background: C.crimson, borderRadius: "4px", padding: 4,
-                }} className="w-42 flex justify-end">
+                  background: C.crimson, borderRadius: "4px", padding: 4, width: "100%"
+                }} className="flex justify-end">
                 <button onClick={() => onRemove(product)} style={{
-                  width: 28, height: 28, background: "rgba(255,255,255,0.2)",
+                  width: 24, height: 24, background: "rgba(255,255,255,0.2)",
                   border: "none", borderRadius: "2px", color: "#fff",
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <FaMinus style={{ fontSize: 9 }} />
+                  <FaMinus style={{ fontSize: 8 }} />
                 </button>
                 <span style={{
-                  color: "#fff", fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-                  fontSize: "14px", minWidth: "2rem", textAlign: "center",
+                  color: "#fff", fontWeight: 600,
+                  fontSize: "13px", minWidth: "1.5rem", textAlign: "center",
                 }}>{count}</span>
                 <button onClick={() => onAdd(product)} style={{
-                  width: 28, height: 28, background: "rgba(255,255,255,0.2)",
+                  width: 24, height: 24, background: "rgba(255,255,255,0.2)",
                   border: "none", borderRadius: "2px", color: "#fff",
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  <FaPlus style={{ fontSize: 9 }} />
+                  <FaPlus style={{ fontSize: 8 }} />
                 </button>
               </motion.div>
             ) : (
               <motion.button key="add" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
                 onClick={() => onAdd(product)} className="btn-outline"
-                style={{justifyContent: "center", padding: "8px", fontSize: "12px",width:'50%' }}>
-                <FaPlus style={{ fontSize: 9 }} /> Add
+                style={{ justifyContent: "center", padding: "6px", fontSize: "12px", width: '100%' }}>
+                <FaPlus style={{ fontSize: 9, marginRight: 2 }} /> Add
               </motion.button>
             )}
           </AnimatePresence>
@@ -474,7 +481,7 @@ const LuckySpinModal = memo(({ isOpen, onClose, freeProducts, onAddFreeProduct, 
       const cleanLabel = rawLabel.substring(0, 28); // Cap cleanly to prevent layout overflows
       
       const fontSize = getDynamicWheelFontSize(cleanLabel.length, count);
-      ctx.font = `bold ${fontSize}px 'Syne', sans-serif`;
+      ctx.font = `bold ${fontSize}px`;
       ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
       ctx.shadowBlur = 4;
 
@@ -1543,7 +1550,7 @@ const Pricelist = () => {
                   </div>
                   <div>
                     <p className="display" style={{ fontSize: "0.85rem", color: C.ink, lineHeight: 1.2 }}>Your Cart</p>
-                    <p style={{ fontSize: "10px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>
+                    <p style={{ fontSize: "10px", color: C.muted }}>
                       {cartItemCount} item{cartItemCount !== 1 ? 's' : ''}{freeCartItem ? " + 1 free 🎁" : ""}
                     </p>
                   </div>
@@ -1648,7 +1655,7 @@ const Pricelist = () => {
                             onClick={() => handleImageClick(product.images)} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{
-                              fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "12px", color: C.ink,
+                              fontWeight: 800, fontSize: "15px", color: C.ink,
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                               lineHeight: 1.3,
                             }}>{product.productname}</p>
@@ -1978,7 +1985,7 @@ const Pricelist = () => {
                     <motion.div key="step2" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} style={{ marginBottom: "1.5rem" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
                         <div>
-                          <p style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, color: C.ink }}>{Object.keys(suggestedCart).length} items suggested</p>
+                          <p style={{ fontWeight: 700, color: C.ink }}>{Object.keys(suggestedCart).length} items suggested</p>
                           <p style={{ fontSize: "12px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>≈ ₹{suggestedTotals} total</p>
                         </div>
                         <button onClick={generateSuggestions} className="btn-outline" style={{ padding: "6px 14px", fontSize: "12px" }}>↻ Regenerate</button>
@@ -2009,7 +2016,7 @@ const Pricelist = () => {
                                   onError={e => e.target.src = need} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <p style={{
-                                    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "12px", color: C.ink,
+                                    fontWeight: 700, fontSize: "12px", color: C.ink,
                                     display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                                   }}>{product.productname}</p>
                                   <p style={{ fontSize: "11px", color: C.crimson, marginTop: 2, fontWeight: 400 }}>₹{priceAfterDiscount} × {qty}</p>
@@ -2053,117 +2060,10 @@ const Pricelist = () => {
         )}
       </AnimatePresence>
 
-      <main style={{ paddingTop: "7rem", paddingBottom: "8rem", maxWidth: "80rem", margin: "0 auto", padding: "7rem 1.5rem 8rem" }}>
-
-        <motion.div className="mobile:-mt-8 hundred:-mt-15 tab:mt-10" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1.5rem" }}>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <div className="search-input-group" style={{ flex: "1 1 240px" }}>
-              <Search className="icon" style={{ width: 16, height: 16, color: C.muted }} />
-              <input
-                type="text"
-                placeholder="Search product name or code…"
-                value={searchInput}
-                onChange={handleSearchInputChange}
-              />
-            </div>
-            <div className="search-input-group" style={{ flex: "1 1 200px" }}>
-              <Tag className="icon" style={{ width: 15, height: 15, color: C.brand }} />
-              <input
-                type="text"
-                placeholder="Search by brand name…"
-                value={brandSearchInput}
-                onChange={handleBrandSearchInputChange}
-                style={{ borderColor: brandSearchInput ? C.brand : undefined }}
-              />
-            </div>
-          </div>
-
-          {(searchInput || brandSearchInput || selectedBrand !== "All") && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-              <span style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif", fontWeight: 400, letterSpacing: "0.1em", textTransform: "uppercase" }}>Filters:</span>
-              {searchInput && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  background: `rgba(192,57,43,0.08)`, border: `1px solid rgba(192,57,43,0.25)`,
-                  color: C.crimson, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-                }}>
-                  "{searchInput}"
-                  <button onClick={clearSearch} style={{ background: "none", border: "none", cursor: "pointer", color: C.crimson, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
-                </span>
-              )}
-              {brandSearchInput && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  background: `rgba(21,101,192,0.08)`, border: `1px solid rgba(21,101,192,0.25)`,
-                  color: C.brand, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-                }}>
-                  Brand: "{brandSearchInput}"
-                  <button onClick={clearBrandSearch} style={{ background: "none", border: "none", cursor: "pointer", color: C.brand, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
-                </span>
-              )}
-              {selectedBrand !== "All" && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  background: `rgba(21,101,192,0.08)`, border: `1px solid rgba(21,101,192,0.25)`,
-                  color: C.brand, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-                }}>
-                  <Tag style={{ width: 10, height: 10 }} /> {selectedBrand}
-                  <button onClick={() => setSelectedBrand("All")} style={{ background: "none", border: "none", cursor: "pointer", color: C.brand, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
-                </span>
-              )}
-              {selectedType !== "All" && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  background: `rgba(192,57,43,0.08)`, border: `1px solid rgba(192,57,43,0.25)`,
-                  color: C.crimson, fontSize: "12px", padding: "3px 10px", borderRadius: "100px",
-                  fontFamily: "'Barlow', sans-serif", fontWeight: 400,
-                }}>
-                  {selectedType}
-                  <button onClick={() => setSelectedType("All")} style={{ background: "none", border: "none", cursor: "pointer", color: C.crimson, padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
-                </span>
-              )}
-              <button
-                onClick={() => { clearSearch(); clearBrandSearch(); setSelectedBrand("All"); setSelectedType("All"); }}
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  color: C.muted, fontSize: "12px", fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 400, textDecoration: "underline", padding: 0,
-                }}>
-                Clear all
-              </button>
-            </div>
-          )}
-        </motion.div>
+      <main style={{ paddingTop: "7rem", paddingBottom: "8rem", maxWidth: "80rem", margin: "0 auto", padding: "2rem 1.5rem 8rem" }}>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "2rem" }}>
-          <button onClick={downloadPDF} className="btn-primary" style={{ gap: 10 }}>
-            <Download style={{ width: 16, height: 16 }} /> Download Pricelist
-          </button>
-          <div style={{ position: "relative" }}>
-            <button onClick={() => setShowAiModal(true)}
-              style={{
-                width: 56, height: 56, background: C.crimson,
-                border: `2px solid ${C.crimson}`, borderRadius: "8px",
-                boxShadow: `3px 3px 0 ${C.crimsonD}`, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "1.5rem", transition: "all 0.2s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translate(-2px,-2px)"; e.currentTarget.style.boxShadow = `5px 5px 0 ${C.crimsonD}`; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = `3px 3px 0 ${C.crimsonD}`; }}>
-              🤖
-            </button>
-            <span style={{
-              position: "absolute", top: -8, right: -40, background: C.saffron, color: "#fff",
-              fontSize: "10px", fontFamily: "'Syne', sans-serif", fontWeight: 700,
-              padding: "3px 8px", borderRadius: "100px", whiteSpace: "nowrap",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            }}>Need Help?</span>
-          </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "1.25rem" }}>
@@ -2268,7 +2168,7 @@ const Pricelist = () => {
                 {items.length} items
               </span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.25rem" }}>
+            <div className="grid hundred:grid-cols-4 mobile:grid-cols-2 w-auto gap-5">
               {items.map((product) => (
                 <ProductCard
                   key={product.serial_number}
@@ -2323,7 +2223,7 @@ const Pricelist = () => {
                   </div>
                   <div>
                     <h2 className="display" style={{ fontSize: "1.05rem", color: C.ink }}>Customer Details</h2>
-                    <p style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>Fill in your details to confirm booking</p>
+                    <p style={{ fontSize: "11px", color: C.muted, }}>Fill in your details to confirm booking</p>
                   </div>
                 </div>
 

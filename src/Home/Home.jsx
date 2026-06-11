@@ -36,18 +36,18 @@ const C = {
 /* ─── Global styles ─────────────────────────────────────────────────────── */
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; }
     body { background: #fdf8f0; color: #2c2c2e; font-family: 'Barlow', sans-serif; }
-    .display { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
+    .display { sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
     .serif   { font-family: 'Lora', serif; }
     .label   { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #c0392b; }
     .stripe-bg { background-image: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(192,57,43,0.025) 6px, rgba(192,57,43,0.025) 7px); }
     .pill { display:inline-flex; align-items:center; gap:6px; background:#c0392b; color:#fff; font-family:'Barlow',sans-serif; font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
     .pill-saffron { background:#e67e22; color:#fff; }
-    .btn-primary { display:inline-flex; align-items:center; gap:10px; background:#c0392b; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.04em; padding:14px 32px; border-radius:4px; border:none; cursor:pointer; transition:all 0.25s ease; }
+    .btn-primary { display:inline-flex; align-items:center; gap:10px; background:#c0392b; color:#fff; sans-serif; font-weight:700; font-size:14px; letter-spacing:0.04em; padding:14px 32px; border-radius:4px; border:none; cursor:pointer; transition:all 0.25s ease; }
     .btn-primary:hover { background:#96281b; transform:translate(-2px,-2px); box-shadow:4px 4px 0 #96281b44; }
-    .btn-outline { display:inline-flex; align-items:center; gap:10px; background:transparent; color:#c0392b; font-family:'Syne',sans-serif; font-weight:700; font-size:13px; letter-spacing:0.04em; padding:12px 28px; border-radius:4px; border:2px solid #c0392b; cursor:pointer; transition:all 0.25s ease; }
+    .btn-outline { display:inline-flex; align-items:center; gap:10px; background:transparent; color:#c0392b; sans-serif; font-weight:700; font-size:13px; letter-spacing:0.04em; padding:12px 28px; border-radius:4px; border:2px solid #c0392b; cursor:pointer; transition:all 0.25s ease; }
     .btn-outline:hover { background:#c0392b; color:#fff; transform:translate(-2px,-2px); }
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:#faf3e4; }
@@ -287,7 +287,6 @@ function IntroLoader({ onComplete }) {
               color: "#e08070", fontSize: 11, fontWeight: 600,
               letterSpacing: "0.22em", textTransform: "uppercase",
               padding: "5px 14px", borderRadius: 100, marginBottom: 20,
-              fontFamily: "'Barlow', sans-serif",
             }}>
               <span style={{
                 width: 6, height: 6, borderRadius: "50%", background: "#c0392b",
@@ -297,7 +296,7 @@ function IntroLoader({ onComplete }) {
             </div>
 
             <h1 style={{
-              fontFamily: "'Syne', sans-serif", fontWeight: 800,
+              fontWeight: 800,
               fontSize: "clamp(2rem,6vw,3rem)", color: "#fff",
               lineHeight: 1.05, letterSpacing: "-0.03em", marginBottom: 6,
             }}>
@@ -339,7 +338,7 @@ function IntroLoader({ onComplete }) {
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 10,
                     background: "#c0392b", color: "#fff",
-                    fontFamily: "'Syne', sans-serif", fontWeight: 700,
+                    fontWeight: 700,
                     fontSize: 13, letterSpacing: "0.06em",
                     padding: "12px 28px", borderRadius: 4, border: "none",
                     cursor: "pointer", marginTop: 8,
@@ -391,7 +390,7 @@ const Firework = ({ delay=0,startPosition,endPosition,burstPosition,colors,onBur
       {promocode && !copiedPromos.includes(promocode.code) && (
         <motion.div initial={{scale:0,opacity:0}} animate={{scale:1,opacity:1}} transition={{delay:delay+4,duration:0.5}}
           className="absolute pointer-events-auto px-6 py-4 rounded-2xl font-bold text-lg"
-          style={{left:burstPosition.x,top:burstPosition.y,transform:"translate(-50%,-50%)",background:"#fff",border:`3px solid ${C.crimson}`,boxShadow:`6px 6px 0 ${C.crimson},0 0 40px rgba(192,57,43,0.2)`,zIndex:45,maxWidth:sw<768?"260px":"auto",fontFamily:"'Syne',sans-serif"}}>
+          style={{left:burstPosition.x,top:burstPosition.y,transform:"translate(-50%,-50%)",background:"#fff",border:`3px solid ${C.crimson}`,boxShadow:`6px 6px 0 ${C.crimson},0 0 40px rgba(192,57,43,0.2)`,zIndex:45,maxWidth:sw<768?"260px":"auto"}}>
           <div className="flex items-center gap-3">
             <motion.div animate={{rotate:360}} transition={{duration:2,repeat:Infinity,ease:"linear"}}>
               <Gift className="w-6 h-6" style={{color:C.crimson}}/>
@@ -552,17 +551,17 @@ function StatCard({ icon:Icon,value,label,suffix,delay }) {
       onMouseEnter={e=>{e.currentTarget.style.borderColor=C.crimson;e.currentTarget.style.transform="translate(-4px,-4px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimson}`}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=""}}>
       <div className="absolute -top-1 -right-2 font-extrabold pointer-events-none select-none"
-        style={{fontFamily:"'Syne',sans-serif",color:`rgba(192,57,43,0.05)`,fontSize:"5rem",lineHeight:1}}>{value}</div>
+        style={{color:`rgba(192,57,43,0.05)`,fontSize:"5rem",lineHeight:1}}>{value}</div>
       <div className="relative z-10">
         <div className="w-14 h-14 rounded-lg flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110"
           style={{background:`rgba(192,57,43,0.07)`,border:`1.5px dashed rgba(192,57,43,0.3)`}}>
           <Icon className="w-7 h-7" style={{color:C.crimson}}/>
         </div>
         <div className="mb-1">
-          <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:"2.5rem",color:C.crimson,lineHeight:1}}>{count}</span>
-          <span style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:"1.5rem",color:C.saffron,lineHeight:1}}>{suffix}</span>
+          <span style={{fontWeight:800,fontSize:"2.5rem",color:C.crimson,lineHeight:1}}>{count}</span>
+          <span style={{fontWeight:800,fontSize:"1.5rem",color:C.saffron,lineHeight:1}}>{suffix}</span>
         </div>
-        <p style={{fontFamily:"'Barlow',sans-serif",fontWeight:600,fontSize:"11px",letterSpacing:"0.2em",textTransform:"uppercase",color:C.slate}}>{label}</p>
+        <p style={{fontWeight:600,fontSize:"11px",letterSpacing:"0.2em",textTransform:"uppercase",color:C.slate}}>{label}</p>
       </div>
     </motion.div>
   )
@@ -639,7 +638,7 @@ export default function Home() {
                     style={{background:`rgba(192,57,43,0.08)`,color:C.crimson,border:`1px solid rgba(192,57,43,0.25)`}}>×</button>
                 </div>
                 <ModernCarousel media={selProduct.image}/>
-                <h3 className="text-base font-semibold mb-2" style={{color:C.ink,fontFamily:"'Syne',sans-serif"}}>About this product</h3>
+                <h3 className="text-base font-semibold mb-2" style={{color:C.ink,}}>About this product</h3>
                 <p className="mb-6 leading-relaxed" style={{color:C.slate,fontSize:"15px"}}>
                   {selProduct.description||"A premium quality firework crafted for your most memorable celebrations."}
                 </p>
@@ -653,39 +652,19 @@ export default function Home() {
       </AnimatePresence>
 
       {/* ══════════════════════ HERO ════════════════════════════════════ */}
-      <motion.section style={{y:heroY,opacity:heroOpacity}} className="relative pt-28 pb-0 px-4 sm:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-6">
-            <motion.div initial={{opacity:0,x:-30}} animate={{opacity:1,x:0}} transition={{delay:0.4}}>
-              <p className="label mb-3">Sivakasi · Est. 2009</p>
-              <h1 className="display" style={{fontSize:"clamp(2.6rem,6vw,5rem)",color:C.ink,maxWidth:"600px"}}>
-                India's Festival<br/>
-                <span style={{color:C.crimson,WebkitTextStroke:`2px ${C.crimson}`,WebkitTextFillColor:"transparent"}}>Fireworks</span>
-                {" "}Store
-              </h1>
-            </motion.div>
-            <motion.div initial={{opacity:0,x:30}} animate={{opacity:1,x:0}} transition={{delay:0.6}} className="flex flex-col gap-3 lg:items-end">
-              <p className="serif italic" style={{color:C.muted,maxWidth:"260px",lineHeight:1.65,textAlign:"right",fontSize:"15px"}}>"Every burst of light is a memory made"</p>
-              <button onClick={()=>navigate("/price-list")} className="btn-primary self-start lg:self-auto">View Price List <ArrowRight className="w-5 h-5"/></button>
-            </motion.div>
-          </div>
-
+      <motion.section style={{y:heroY,opacity:heroOpacity}} className="relative hundred:pt-32 mobile:pt-10 pb-0 px-4 sm:px-8 lg:px-12">
+        <div className="hundred:max-w-6xl mobile:-auto mx-auto">
           {/* Banner */}
           <div 
-            className="relative rounded-t-2xl overflow-hidden w-full"
+            className="relative rounded-t-2xl overflow-hidden w-full mobile:max-h-[140px] hundred:max-h-[100%]"
             style={{
-              height: "clamp(200px, 45vw, 400px)", 
+              height: "clamp(160px, 45vw, 390px)", 
               border: `2px solid ${C.borderD}`,
               borderBottom: "none",
               boxShadow: `6px 6px 0 ${C.crimson}`,
               maxWidth: "100%"
             }}
           >
-            <div className="absolute top-4 left-4 z-10 px-4 py-2 rounded font-bold text-sm"
-              style={{background: C.crimson, color: "#fff", fontFamily: "'Syne', sans-serif", letterSpacing: "0.1em"}}>
-              SPC
-            </div>
-
             <AnimatePresence mode="wait">
               {banners.map((b, i) => slide === i && (
                 <motion.div 
@@ -734,7 +713,7 @@ export default function Home() {
           <div className="grid grid-cols-4 divide-x" style={{background:C.crimson,borderRadius:"0 0 12px 12px",boxShadow:`6px 4px 0 ${C.crimsonD}`}}>
             {[["200+","Products"],["500+","Clients"],["100%","Satisfaction"],["15+","Years"]].map(([v,l],i)=>(
               <div key={i} className="py-4 text-center" style={{borderRight:i<3?"1px solid rgba(255,255,255,0.2)":undefined}}>
-                <div className="font-extrabold text-xl text-white" style={{fontFamily:"'Syne',sans-serif"}}>{v}</div>
+                <div className="font-extrabold text-xl text-white">{v}</div>
                 <div className="text-xs text-white" style={{opacity:0.7,letterSpacing:"0.1em",textTransform:"uppercase",fontFamily:"'Barlow',sans-serif"}}>{l}</div>
               </div>
             ))}
@@ -748,7 +727,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
               <p className="label mb-2">Flying off the shelves</p>
-              <h2 className="display" style={{fontSize:"clamp(2rem,4vw,3rem)",color:C.ink}}>Fast&#8209;Running<br/>Favourites</h2>
+              <h2 className="display" style={{fontSize:"clamp(2rem,4vw,3rem)",color:C.ink}}>Fast-Running<br/>Favourites</h2>
             </div>
             <div className="flex items-center gap-2 pb-1">
               <div style={{width:"48px",height:"3px",background:C.crimson,borderRadius:"2px"}}/>
@@ -777,7 +756,7 @@ export default function Home() {
                     </button>
                   </div>
                   <div className="p-5">
-                    <h3 className="font-bold text-base mb-3 line-clamp-2" style={{fontFamily:"'Syne',sans-serif",color:C.ink}}>{product.productname}</h3>
+                    <h3 className="font-bold text-base mb-3 line-clamp-2" style={{color:C.ink}}>{product.productname}</h3>
                     <div className="flex items-baseline gap-2 mb-4">
                       <span className="text-sm line-through" style={{color:C.muted}}>₹{orig}</span>
                       <span className="display text-2xl" style={{color:C.crimson}}>₹{final}</span>
@@ -807,7 +786,7 @@ export default function Home() {
                 style={{border:`2px solid ${C.parchment}`,background:C.parchment}}/>
               <div className="absolute -top-5 -left-5 w-20 h-20 rounded-full flex flex-col items-center justify-center"
                 style={{background:C.crimson,border:"4px solid #fff",boxShadow:`4px 4px 0 ${C.crimsonD}`}}>
-                <span className="text-white font-extrabold text-xl leading-none" style={{fontFamily:"'Syne',sans-serif"}}>15</span>
+                <span className="text-white font-extrabold text-xl leading-none">15</span>
                 <span className="text-white text-xs" style={{opacity:0.85,letterSpacing:"0.1em"}}>YRS</span>
               </div>
             </motion.div>
@@ -858,11 +837,11 @@ export default function Home() {
                     style={{background:`rgba(192,57,43,0.07)`,border:`1.5px dashed ${C.crimson}`}}>
                     <Icon className="w-7 h-7" style={{color:C.crimson}}/>
                   </div>
-                  <span style={{fontSize:"3rem",fontFamily:"'Syne',sans-serif",fontWeight:800,color:`rgba(192,57,43,0.07)`,lineHeight:1}}>
+                  <span style={{fontSize:"3rem",fontWeight:800,color:`rgba(192,57,43,0.07)`,lineHeight:1}}>
                     {String(i+1).padStart(2,"0")}
                   </span>
                 </div>
-                <h3 className="font-extrabold text-lg mb-2" style={{fontFamily:"'Syne',sans-serif",color:C.ink}}>{name}</h3>
+                <h3 className="font-extrabold text-lg mb-2" style={{color:C.ink}}>{name}</h3>
                 <p className="text-sm mb-5 leading-relaxed" style={{color:C.muted}}>{description}</p>
                 <button onClick={()=>navigate("/price-list")} className="btn-outline text-sm" style={{padding:"8px 20px"}}>
                   Explore <ArrowRight className="w-4 h-4"/>
@@ -892,14 +871,14 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4">
               <button onClick={()=>navigate("/price-list")}
                 className="inline-flex items-center gap-3 px-10 py-4 rounded font-bold transition-all duration-250"
-                style={{background:"#fff",color:C.crimson,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:"15px",letterSpacing:"0.04em",boxShadow:`4px 4px 0 ${C.crimsonD}`}}
+                style={{background:"#fff",color:C.crimson,fontWeight:800,fontSize:"15px",letterSpacing:"0.04em",boxShadow:`4px 4px 0 ${C.crimsonD}`}}
                 onMouseEnter={e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimsonD}`}}
                 onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=`4px 4px 0 ${C.crimsonD}`}}>
                 View Full Price List <ArrowRight className="w-5 h-5"/>
               </button>
               <button onClick={()=>navigate("/contact-us")}
                 className="inline-flex items-center gap-3 px-10 py-4 rounded font-bold transition-all"
-                style={{background:"transparent",color:"#fff",border:"2px solid rgba(255,255,255,0.55)",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:"15px",letterSpacing:"0.04em"}}
+                style={{background:"transparent",color:"#fff",border:"2px solid rgba(255,255,255,0.55)",fontWeight:700,fontSize:"15px",letterSpacing:"0.04em"}}
                 onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.1)"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 Contact Us

@@ -42,7 +42,6 @@ export default function Navbar() {
   const [activeTab, setActiveTab] = useState(location.pathname)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Check if current page is price-list
   const isPriceListPage = location.pathname === "/price-list"
 
   useEffect(() => {
@@ -86,13 +85,15 @@ export default function Navbar() {
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="display text-2xl font-bold tracking-tight hidden hundred:block" style={{ color: C.ink }}>
+                  <h1 className="text-2xl font-bold hidden hundred:block" style={{ color: C.ink }}>
                     Sree Palaniyappa
                   </h1>
-                  <h1 className="display text-2xl font-bold tracking-tight hundred:hidden" style={{ color: C.ink }}>
+                  <h1 className="text-2xl font-bold hundred:hidden" style={{ color: C.ink }}>
                     SP
                   </h1>
-                  <p className="label tracking-[2px] hidden hundred:hidden mobile:block" style={{ color: C.crimson }}>CRACKERS</p>
+                  <p className="text-sm font-medium hidden hundred:hidden mobile:block" style={{ color: C.crimson }}>
+                    CRACKERS
+                  </p>
                 </div>
               </motion.div>
 
@@ -135,7 +136,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleNavigation("/price-list")}
-                className="btn-primary hidden lg:flex items-center gap-2 text-sm md:text-base px-6 py-2.5 rounded-xl shadow-md text-white"
+                className="btn-primary hidden lg:flex items-center gap-2 text-sm md:text-base px-6 py-2.5 rounded-xl shadow-md text-white font-medium"
                 style={{ background: `linear-gradient(135deg, ${C.crimson}, ${C.crimsonD})` }}
               >
                 <Sparkles className="w-4 h-4" />
