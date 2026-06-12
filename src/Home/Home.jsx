@@ -653,10 +653,10 @@ export default function Home() {
 
       {/* ══════════════════════ HERO ════════════════════════════════════ */}
       <motion.section style={{y:heroY,opacity:heroOpacity}} className="relative hundred:pt-32 mobile:pt-10 pb-0 px-4 sm:px-8 lg:px-12">
-        <div className="hundred:max-w-6xl mobile:-auto mx-auto">
+        <div className="hundred:max-w-6xl tab:max-w-6xl tab:mt-32 mobile:-auto mx-auto">
           {/* Banner */}
           <div 
-            className="relative rounded-t-2xl overflow-hidden w-full mobile:max-h-[140px] hundred:max-h-[100%]"
+            className="relative rounded-t-2xl overflow-hidden w-full mobile:max-h-[140px] tab:max-h-[100%] hundred:max-h-[100%]"
             style={{
               height: "clamp(160px, 45vw, 390px)", 
               border: `2px solid ${C.borderD}`,

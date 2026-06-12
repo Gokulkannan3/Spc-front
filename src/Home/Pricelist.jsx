@@ -2168,7 +2168,7 @@ const Pricelist = () => {
                 {items.length} items
               </span>
             </div>
-            <div className="grid hundred:grid-cols-4 mobile:grid-cols-2 w-auto gap-5">
+            <div className="grid hundred:grid-cols-4 tab:grid-cols-4 mobile:grid-cols-2 w-auto gap-5">
               {items.map((product) => (
                 <ProductCard
                   key={product.serial_number}
