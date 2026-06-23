@@ -8,19 +8,21 @@ import { API_BASE_URL } from "../../Config"
 import axios from 'axios'
 
 const C = {
-  ivory:    "#fdf8f0",
-  cream:    "#faf3e4",
-  parchment:"#f5e9c9",
-  crimson:  "#c0392b",
-  crimsonD: "#96281b",
+  ivory:    "#351418", // Balanced Royal Maroon backdrop (softer and slightly lighter dark tone)
+  cream:    "#6e3137", // Lighter warm maroon contrast for sections & cards
+  parchment:"#5e2a2f", // Textured accent borders
+  crimson:  "#e74c3c", // Vibrant crimson for great contrast readability
+  crimsonD: "#c0392b", 
+  crimsonL: "#ff6b6b",
   saffron:  "#e67e22",
   saffronL: "#f39c12",
-  charcoal: "#1c1c1e",
-  ink:      "#2c2c2e",
-  slate:    "#4a4a52",
-  muted:    "#7c7c88",
-  border:   "#e8dcc8",
-  borderD:  "#d4c4a0",
+  ember:    "#d35400",
+  charcoal: "#200a0d", // Deep base for footer block text alignment
+  ink:      "#fdf8f0", // Clean warm ivory text for flawless dark mode legibility
+  slate:    "#e8dcc8", // Light muted subheader text
+  muted:    "#bca9ab", // Perfectly balanced mid-tone description labels
+  border:   "#5e2a2f", // Coordinating system framework lines
+  borderD:  "#70353a",
 }
 
 const GlobalStyles = () => (
@@ -38,13 +40,13 @@ const GlobalStyles = () => (
 )
 
 const statusConfig = {
-  pending:   { color: C.saffron, bg: `rgba(230,126,34,0.1)`, border: `rgba(230,126,34,0.3)`, icon: Clock },
-  confirmed: { color: "#1565c0", bg: "rgba(21,101,192,0.08)", border: "rgba(21,101,192,0.25)", icon: CheckCircle },
-  packed:    { color: "#6a1b9a", bg: "rgba(106,27,154,0.08)", border: "rgba(106,27,154,0.25)", icon: Package },
-  dispatched:{ color: C.saffron, bg: `rgba(230,126,34,0.1)`, border: `rgba(230,126,34,0.3)`, icon: Truck },
-  delivered: { color: "#2e7d32", bg: "rgba(46,125,50,0.08)", border: "rgba(46,125,50,0.25)", icon: CheckCircle },
-  booked:    { color: "#2e7d32", bg: "rgba(46,125,50,0.08)", border: "rgba(46,125,50,0.25)", icon: CheckCircle },
-  canceled:  { color: C.crimson, bg: `rgba(192,57,43,0.08)`, border: `rgba(192,57,43,0.25)`, icon: AlertCircle },
+  pending:   { color: C.saffron, bg: `rgba(230,126,34,0.15)`, border: `rgba(230,126,34,0.35)`, icon: Clock },
+  confirmed: { color: "#5dade2", bg: "rgba(93,173,226,0.12)", border: "rgba(93,173,226,0.3)", icon: CheckCircle },
+  packed:    { color: "#bb8fce", bg: "rgba(187,143,206,0.12)", border: "rgba(187,143,206,0.3)", icon: Package },
+  dispatched:{ color: C.saffron, bg: `rgba(230,126,34,0.15)`, border: `rgba(230,126,34,0.35)`, icon: Truck },
+  delivered: { color: "#52be80", bg: "rgba(82,190,128,0.12)", border: "rgba(82,190,128,0.3)", icon: CheckCircle },
+  booked:    { color: "#52be80", bg: "rgba(82,190,128,0.12)", border: "rgba(82,190,128,0.3)", icon: CheckCircle },
+  canceled:  { color: C.crimsonL, bg: `rgba(231,76,60,0.15)`, border: `rgba(231,76,60,0.35)`, icon: AlertCircle },
 }
 
 const Status = () => {
@@ -221,7 +223,7 @@ const Status = () => {
           </div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            style={{ background: "#fff", border: `2px solid ${C.border}`, borderRadius: "8px", padding: "2rem", marginBottom: "3rem", maxWidth: "26rem", margin: "0 auto 3rem", boxShadow: `4px 4px 0 ${C.parchment}` }}>
+            style={{ background: C.cream, border: `2px solid ${C.border}`, borderRadius: "8px", padding: "2rem", marginBottom: "3rem", maxWidth: "26rem", margin: "0 auto 3rem", boxShadow: `4px 4px 0 ${C.parchment}` }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               <div>
                 <span className="label" style={{ marginBottom: "0.5rem" }}>Mobile Number</span>
@@ -234,7 +236,7 @@ const Status = () => {
                     value={searchForm.mobile_number} 
                     onChange={handleInputChange} 
                     maxLength={10}
-                    style={{ width: "100%", paddingLeft: 40, paddingRight: 14, paddingTop: 11, paddingBottom: 11, border: `1.5px solid ${C.border}`, borderRadius: "4px", background: C.cream, fontFamily: "'Barlow', sans-serif", fontSize: "14px", color: C.ink }} 
+                    style={{ width: "100%", paddingLeft: 40, paddingRight: 14, paddingTop: 11, paddingBottom: 11, border: `1.5px solid ${C.border}`, borderRadius: "4px", background: C.ivory, fontFamily: "'Barlow', sans-serif", fontSize: "14px", color: C.ink }} 
                   />
                 </div>
               </div>
@@ -285,7 +287,7 @@ const Status = () => {
                           initial={{ opacity: 0, y: 20 }} 
                           animate={{ opacity: 1, y: 0 }}
                           style={{ 
-                            background: "#fff", 
+                            background: C.cream, 
                             border: `1.5px solid ${C.border}`, 
                             borderRadius: "8px", 
                             overflow: "hidden",
@@ -320,7 +322,7 @@ const Status = () => {
                                     {status}
                                   </span>
                                 </div>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", fontSize: "12px", color: C.muted }}>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", fontSize: "12px", color: C.slate }}>
                                   <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
                                     <Calendar style={{ width: 12, height: 12 }} />{formatDate(order.created_at)}
                                   </span>
@@ -331,16 +333,16 @@ const Status = () => {
                               </div>
 
                               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <span className="display" style={{ fontSize: "1.6rem", color: C.crimson }}>
+                                <span className="display" style={{ fontSize: "1.6rem", color: C.crimsonL }}>
                                   ₹{formatPrice(order.total)}
                                 </span>
                                 <div style={{ display: "flex", gap: 6 }}>
                                   <button 
                                     onClick={() => downloadInvoice(order)}
                                     style={{ 
-                                      width: 36, height: 36, background: "rgba(46,125,50,0.08)", 
-                                      border: "1px solid rgba(46,125,50,0.25)", borderRadius: "4px", 
-                                      color: "#2e7d32", cursor: "pointer", display: "flex", 
+                                      width: 36, height: 36, background: "rgba(82,190,128,0.15)", 
+                                      border: "1px solid rgba(82,190,128,0.3)", borderRadius: "4px", 
+                                      color: "#52be80", cursor: "pointer", display: "flex", 
                                       alignItems: "center", justifyContent: "center" 
                                     }}
                                   >
@@ -349,9 +351,9 @@ const Status = () => {
                                   <button 
                                     onClick={() => toggleTimeline(key)}
                                     style={{ 
-                                      width: 36, height: 36, background: `rgba(192,57,43,0.08)`, 
-                                      border: `1px solid rgba(192,57,43,0.25)`, borderRadius: "4px", 
-                                      color: C.crimson, cursor: "pointer", display: "flex", 
+                                      width: 36, height: 36, background: `rgba(231,76,60,0.15)`, 
+                                      border: `1px solid rgba(231,76,60,0.35)`, borderRadius: "4px", 
+                                      color: C.crimsonL, cursor: "pointer", display: "flex", 
                                       alignItems: "center", justifyContent: "center" 
                                     }}
                                   >
@@ -365,8 +367,8 @@ const Status = () => {
                               <div style={{ 
                                 marginTop: "1rem", 
                                 padding: "14px", 
-                                background: "rgba(230,126,34,0.08)", 
-                                border: `1px solid rgba(230,126,34,0.2)`, 
+                                background: "rgba(230,126,34,0.12)", 
+                                border: `1px solid rgba(230,126,34,0.35)`, 
                                 borderRadius: "6px" 
                               }}>
                                 <p style={{ fontSize: "12.5px", fontWeight: 700, color: C.saffron, marginBottom: "8px" }}>
@@ -383,7 +385,7 @@ const Status = () => {
                                 {order.transport_contact && (
                                   <p style={{ fontSize: "13.5px", color: C.ink }}>
                                     <strong>Contact:</strong>{" "}
-                                    <a href={`tel:${order.transport_contact}`} style={{ color: C.crimson, fontWeight: 600 }}>
+                                    <a href={`tel:${order.transport_contact}`} style={{ color: C.crimsonL, fontWeight: 600 }}>
                                       {order.transport_contact}
                                     </a>
                                   </p>
@@ -419,18 +421,18 @@ const Status = () => {
                                               top: 32, 
                                               width: 2, 
                                               height: "calc(100% - 8px)", 
-                                              background: step.completed ? "#2e7d32" : C.parchment, 
+                                              background: step.completed ? "#52be80" : C.parchment, 
                                               borderRadius: 2 
                                             }} />
                                           )}
                                           <div style={{ 
                                             width: 28, height: 28, borderRadius: "4px", 
-                                            background: step.completed ? "rgba(46,125,50,0.1)" : C.cream, 
-                                            border: `1.5px solid ${step.completed ? "#2e7d32" : C.border}`, 
+                                            background: step.completed ? "rgba(82,190,128,0.15)" : C.ivory, 
+                                            border: `1.5px solid ${step.completed ? "#52be80" : C.border}`, 
                                             display: "flex", alignItems: "center", justifyContent: "center", 
                                             flexShrink: 0, zIndex: 1 
                                           }}>
-                                            <StepIcon style={{ width: 13, height: 13, color: step.completed ? "#2e7d32" : C.muted }} />
+                                            <StepIcon style={{ width: 13, height: 13, color: step.completed ? "#52be80" : C.muted }} />
                                           </div>
                                           <div style={{ flex: 1, paddingTop: 4 }}>
                                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -438,7 +440,7 @@ const Status = () => {
                                                 {step.status}
                                               </p>
                                               {step.date && (
-                                                <p style={{ fontSize: "11px", color: C.muted, fontFamily: "'Barlow', sans-serif" }}>
+                                                <p style={{ fontSize: "11px", color: C.slate, fontFamily: "'Barlow', sans-serif" }}>
                                                   {formatDate(step.date)}
                                                 </p>
                                               )}

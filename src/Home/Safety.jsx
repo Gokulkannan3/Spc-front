@@ -3,21 +3,23 @@ import { Shield, AlertTriangle, CheckCircle, XCircle, Flame, Droplets, Eye, User
 import Navbar from "../Component/Navbar"
 import "../App.css"
 
-/* ─── Design tokens ─────────────────────────────────────────────────────── */
+/* ─── Design tokens (Synchronized with the balanced mid-tone warm base) ─── */
 const C = {
-  ivory:    "#fdf8f0",
-  cream:    "#faf3e4",
-  parchment:"#f5e9c9",
-  crimson:  "#c0392b",
-  crimsonD: "#96281b",
+  ivory:    "#351418", // Balanced Royal Maroon backdrop (softer and slightly lighter dark tone)
+  cream:    "#6e3137", // Lighter warm maroon contrast for sections & cards
+  parchment:"#5e2a2f", // Textured accent borders
+  crimson:  "#e74c3c", // Vibrant crimson for great contrast readability
+  crimsonD: "#c0392b", 
+  crimsonL: "#ff6b6b",
   saffron:  "#e67e22",
   saffronL: "#f39c12",
-  charcoal: "#1c1c1e",
-  ink:      "#2c2c2e",
-  slate:    "#4a4a52",
-  muted:    "#7c7c88",
-  border:   "#e8dcc8",
-  borderD:  "#d4c4a0",
+  ember:    "#d35400",
+  charcoal: "#200a0d", // Deep base for footer block text alignment
+  ink:      "#fdf8f0", // Clean warm ivory text for flawless dark mode legibility
+  slate:    "#e8dcc8", // Light muted subheader text
+  muted:    "#bca9ab", // Perfectly balanced mid-tone description labels
+  border:   "#5e2a2f", // Coordinating system framework lines
+  borderD:  "#70353a",
 }
 
 const GlobalStyles = () => (
@@ -128,7 +130,7 @@ export default function Safety() {
                   <CheckCircle style={{ width: 28, height: 28, color: "#fff" }} />
                 </div>
                 <div>
-                  <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "#2e7d32", display: "block", marginBottom: 4 }}>Best Practices</span>
+                  <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "#1b5e20", display: "block", marginBottom: 4 }}>Best Practices</span>
                   <h2 className="display" style={{ fontSize: "clamp(1.75rem,3vw,2.5rem)", color: C.ink }}>Safety Do's</h2>
                 </div>
               </div>
@@ -138,13 +140,13 @@ export default function Safety() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
               {dosData.map(({ icon: Icon, num, title, description }, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
-                  style={{ background: "#fff", border: `1px solid ${C.border}`, borderRadius: "8px", padding: "1.75rem", cursor: "default", transition: "all 0.28s ease", position: "relative", overflow: "hidden" }}
+                  style={{ background: C.ivory, border: `1px solid ${C.border}`, borderRadius: "8px", padding: "1.75rem", cursor: "default", transition: "all 0.28s ease", position: "relative", overflow: "hidden" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = "#2e7d32"; e.currentTarget.style.transform = "translate(-4px,-4px)"; e.currentTarget.style.boxShadow = "6px 6px 0 #2e7d32"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
-                  <div style={{ position: "absolute", top: -8, right: -4, fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "5rem", color: "rgba(46,125,50,0.05)", lineHeight: 1, userSelect: "none" }}>{num}</div>
+                  <div style={{ position: "absolute", top: -8, right: -4, fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "5rem", color: "rgba(27,94,32,0.06)", lineHeight: 1, userSelect: "none" }}>{num}</div>
                   <div style={{ position: "relative" }}>
                     <div style={{ width: 52, height: 52, background: "rgba(46,125,50,0.08)", border: "1.5px dashed #2e7d32", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
-                      <Icon style={{ width: 24, height: 24, color: "#2e7d32" }} />
+                      <Icon style={{ width: 24, height: 24, color: "#1b5e20" }} />
                     </div>
                     <h3 className="display" style={{ fontSize: "1.05rem", color: C.ink, marginBottom: "0.6rem" }}>{title}</h3>
                     <p style={{ color: C.slate, fontSize: "13.5px", lineHeight: 1.7 }}>{description}</p>
@@ -174,12 +176,12 @@ export default function Safety() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.25rem" }}>
               {dontsData.map(({ icon: Icon, num, title, description }, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
-                  style={{ background: "#fff", border: `1px solid ${C.border}`, borderRadius: "8px", padding: "1.75rem", cursor: "default", transition: "all 0.28s ease", position: "relative", overflow: "hidden" }}
+                  style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: "8px", padding: "1.75rem", cursor: "default", transition: "all 0.28s ease", position: "relative", overflow: "hidden" }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.crimson; e.currentTarget.style.transform = "translate(-4px,-4px)"; e.currentTarget.style.boxShadow = `6px 6px 0 ${C.crimson}`; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
-                  <div style={{ position: "absolute", top: -8, right: -4, fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "5rem", color: `rgba(192,57,43,0.05)`, lineHeight: 1, userSelect: "none" }}>{num}</div>
+                  <div style={{ position: "absolute", top: -8, right: -4, fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: "5rem", color: `rgba(184,46,31,0.06)`, lineHeight: 1, userSelect: "none" }}>{num}</div>
                   <div style={{ position: "relative" }}>
-                    <div style={{ width: 52, height: 52, background: `rgba(192,57,43,0.07)`, border: `1.5px dashed ${C.crimson}`, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+                    <div style={{ width: 52, height: 52, background: `rgba(184,46,31,0.07)`, border: `1.5px dashed ${C.crimson}`, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
                       <Icon style={{ width: 24, height: 24, color: C.crimson }} />
                     </div>
                     <h3 className="display" style={{ fontSize: "1.05rem", color: C.ink, marginBottom: "0.6rem" }}>{title}</h3>
@@ -238,7 +240,7 @@ export default function Safety() {
         {/* ══════════════ FOOTER ══════════════════════════════════════════ */}
         <footer style={{background:C.charcoal,color:"rgba(255,255,255,0.6)",borderTop:`4px solid ${C.crimson}`}}>
           <div className="px-4 sm:px-8 lg:px-12 py-3 flex items-center justify-between" style={{background:C.crimson}}>
-            <span className="text-white font-extrabold text-lg" style={{fontFamily:"'Syne',sans-serif",letterSpacing:"0.08em"}}>Sree Palaniyappa Cracakers</span>
+            <span className="text-white font-extrabold text-lg" style={{fontFamily:"'Syne',sans-serif",letterSpacing:"0.08em"}}>Sree Palaniyappa Crackers</span>
             <span className="text-white text-xs" style={{opacity:0.8,fontFamily:"'Barlow',sans-serif",letterSpacing:"0.15em"}}>SIVAKASI · EST. 2009</span>
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14 mobile:mb-5">

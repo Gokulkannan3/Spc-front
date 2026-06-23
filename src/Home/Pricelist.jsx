@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaPlus, FaMinus, FaArrowLeft, FaArrowRight, FaInfoCircle, FaExpand, FaCompress, FaDownload } from "react-icons/fa";
-import { ShoppingCart, Search, Filter, X, Download, Gift, Tag } from "lucide-react";
+import { ShoppingCart, Search, Filter, X, Download, Gift, Tag, Bold } from "lucide-react";
 import Navbar from "../Component/Navbar";
 import { API_BASE_URL } from "../../Config";
 import RocketLoader from "../Component/RocketLoader";
@@ -14,24 +14,22 @@ import "../App.css";
 import need from '../spc.jpg';
 
 const C = {
-  ivory:    "#fdf8f0",
-  cream:    "#faf3e4",
-  parchment:"#f5e9c9",
-  crimson:  "#c0392b",
-  crimsonD: "#96281b",
+  ivory:    "#351418", // Balanced Royal Maroon backdrop (softer and slightly lighter dark tone)
+  cream:    "#6e3137", // Lighter warm maroon contrast for sections & cards
+  parchment:"#5e2a2f", // Textured accent borders
+  crimson:  "#e74c3c", // Vibrant crimson for great contrast readability
+  crimsonD: "#c0392b", 
+  crimsonL: "#ff6b6b",
   saffron:  "#e67e22",
   saffronL: "#f39c12",
-  ink:      "#2c2c2e",
-  slate:    "#4a4a52",
-  muted:    "#7c7c88",
-  border:   "#e8dcc8",
-  borderD:  "#d4c4a0",
-  green:    "#2e7d32",
-  brand:    "#1565c0",
-  selectedBg: "#f5e9c9",
-  selectedBorder: "#d4a97a",
-};
-
+  ember:    "#d35400",
+  charcoal: "#200a0d", // Deep base for footer block text alignment
+  ink:      "#fdf8f0", // Clean warm ivory text for flawless dark mode legibility
+  slate:    "#e8dcc8", // Light muted subheader text
+  muted:    "#bca9ab", // Perfectly balanced mid-tone description labels
+  border:   "#5e2a2f", // Coordinating system framework lines
+  borderD:  "#70353a",
+}
 const MIN_PURCHASE = 2000;
 
 const GLOBAL_STYLES_CSS = `
@@ -131,10 +129,8 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
         left: 0,
         right: 0,
         zIndex: 55,
-        background: isUnlocked
-          ? `linear-gradient(90deg, #1b5e20 0%, ${C.green} 100%)`
-          : `linear-gradient(90deg, ${C.ink} 0%, #3a3a42 100%)`,
-        color: "#fff",
+        background:'white',
+        color: "#000",
         padding: "0.45rem 1.25rem 0.55rem",
         boxShadow: "0 2px 16px rgba(0,0,0,0.22)",
         cursor: isUnlocked ? "pointer" : "default",
@@ -221,9 +217,9 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
       animate={{ opacity: 1, y: 0 }}
       className={isSelected ? "product-card-selected" : ""}
       style={{
-        background: isSelected ? C.selectedBg : "#fff",
+        background:  C.cream,
         border: `1px solid ${isSelected ? C.selectedBorder : C.border}`,
-        borderRadius: "8px",
+        borderRadius: "15px",
         overflow: "hidden",
         transition: "all 0.28s ease",
         boxShadow: isSelected ? `3px 3px 0 ${C.selectedBorder}` : "none",
@@ -256,20 +252,20 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
         </div>
         <button
           onClick={() => onShowDetails(product)}
+          className="flex justify-center"
           style={{
             position: "absolute", top: 10, right: 10,
             width: 32, height: 32, background: "#fff",
-            border: `1px solid ${C.border}`, borderRadius: "4px",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            border: `1px solid ${C.border}`, borderRadius: "24px",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContext: "center",
           }}
         >
-          <FaInfoCircle style={{ color: C.crimson, fontSize: 13 }} />
+          <FaInfoCircle style={{ color: C.crimson, fontSize: 24 }} />
         </button>
       </div>
-      {/* 1. Update card content padding from 1rem to a fluid responsive padding */}
-      <div className="p-5" style={{ background: isSelected ? C.selectedBg : "transparent", transition: "background 0.3s" }}>
+      <div className="p-5" style={{ background: C.cream, transition: "background 0.3s" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <p style={{ fontSize: "10px", color: C.muted, letterSpacing: "0.1em" }}>
+          <p style={{color:C.crimson, fontSize: "13px", letterSpacing: "0.1em", fontWeight: "bold" }}>
             {product.serial_number}
           </p>
           {product.brand && (
@@ -280,26 +276,23 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
           )}
         </div>
         
-        {/* 2. Adjust heading text size fluidly so long firecracker names don't crowd lines */}
         <h3 style={{
-          fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", color: C.ink,
+          fontWeight: 800, fontSize: "clamp(13px, 3.5vw, 16px)", color: C.ink, // Fixed contrast visibility rule
           marginBottom: "0.4rem", display: "-webkit-box", WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.25,
         }} className="font-bold">{product.productname}</h3>
         
-        {/* 3. Wrap price metrics safely */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "4px 6px", marginBottom: "0.75rem" }}>
           {product.discount > 0 && (
-            <span style={{ fontSize: "13px", color: C.muted, textDecoration: "line-through", fontWeight: 700 }}>
+            <span style={{ color:C.crimson, fontSize: "15px", textDecoration: "line-through", fontWeight: 700 }}>
               ₹{formatPrice(originalPrice)}
             </span>
           )}
-          <span style={{ fontWeight: 1000, fontSize: "1.1rem", color: C.crimson }}>₹{finalPrice}</span>
+          <span style={{ fontWeight: 1000, fontSize: "1.1rem", color: C.ink }}>₹{finalPrice}</span>
           <span style={{ fontSize: "10px", color: C.muted }}>/{product.per}</span>
         </div>
         
-        {/* 4. Let interactive controls grow full width instead of half-width on tiny columns */}
-        <div className="flex justify-end w-full">
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px", width: "100%" }}>
           <AnimatePresence mode="wait" style={{display: "flex", justifyContent: "end", width: "100%"}}>
             {count > 0 ? (
               <motion.div key="qty" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
@@ -329,8 +322,8 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
             ) : (
               <motion.button key="add" initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
                 onClick={() => onAdd(product)} className="btn-outline"
-                style={{ justifyContent: "center", padding: "6px", fontSize: "12px", width: '100%' }}>
-                <FaPlus style={{ fontSize: 9, marginRight: 2 }} /> Add
+                style={{ color:"white", justifyContent: "center", padding: "6px", fontSize: "14px", width: '100%', fontWeight: "bolder" }}>
+                <FaPlus style={{ fontSize: 9, marginRight: 2 }} /> Add to cart
               </motion.button>
             )}
           </AnimatePresence>
@@ -1357,10 +1350,10 @@ const Pricelist = () => {
     <div style={{ display: "flex", flexDirection: "column", gap: 6, fontFamily: "'Barlow', sans-serif", fontSize: "12px" }}>
       {[
         { label: "Net Total", val: `₹${totals.net}`, color: C.ink },
-        { label: "Product Discount", val: `−₹${totals.product_discount}`, color: C.green },
-        ...(appliedPromo ? [{ label: `Promo (${appliedPromo.code})`, val: `−₹${totals.promo_discount}`, color: C.green }] : []),
-        { label: "You Save", val: `−₹${totals.save}`, color: C.green },
-        { label: "Processing Fee (1%)", val: `₹${totals.processing_fee}`, color: C.muted },
+        { label: "Product Discount", val: `−₹${totals.product_discount}`, color: C.crimson },
+        ...(appliedPromo ? [{ label: `Promo (${appliedPromo.code})`, val: `−₹${totals.promo_discount}`, color: C.crimson }] : []),
+        { label: "You Save", val: `−₹${totals.save}`, color: C.crimson },
+        { label: "Processing Fee (1%)", val: `₹${totals.processing_fee}`, color: C.ink },
       ].map(({ label, val, color }) => (
         <div key={label} style={{ display: "flex", justifyContent: "space-between", color, fontWeight: 400 }}>
           <span>{label}</span><span>{val}</span>
@@ -1469,7 +1462,7 @@ const Pricelist = () => {
               <div style={{ padding: "2rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
                   <div>
-                    <h2 className="display" style={{ fontSize: "1.4rem", color: C.ink, marginBottom: "0.5rem" }}>
+                    <h2 className="display" style={{ fontSize: "1.4rem", color: C.crimson, marginBottom: "0.5rem" }}>
                       {selectedProduct.productname}
                     </h2>
                     {selectedProduct.brand && (
@@ -1492,8 +1485,8 @@ const Pricelist = () => {
                   }}>×</button>
                 </div>
                 <ModernCarousel media={selectedProduct.images} onImageClick={handleImageClick} />
-                <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "14px", color: C.ink, marginBottom: "0.5rem" }}>About this product</h3>
-                <p style={{ color: C.slate, fontSize: "14px", lineHeight: 1.7, marginBottom: "1.5rem" }}>
+                <h3 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "14px", color: C.crimson, marginBottom: "0.5rem" }}>About this product</h3>
+                <p style={{ color: C.ivory, fontSize: "14px", lineHeight: 1.7, marginBottom: "1.5rem" }}>
                   {selectedProduct.description || "A premium quality firework crafted for your most memorable celebrations."}
                 </p>
                 <button onClick={() => { addToCart(selectedProduct); handleCloseDetails(); }} className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>
@@ -1550,7 +1543,7 @@ const Pricelist = () => {
                   </div>
                   <div>
                     <p className="display" style={{ fontSize: "0.85rem", color: C.ink, lineHeight: 1.2 }}>Your Cart</p>
-                    <p style={{ fontSize: "10px", color: C.muted }}>
+                    <p style={{ fontSize: "10px", color: C.crimson }}>
                       {cartItemCount} item{cartItemCount !== 1 ? 's' : ''}{freeCartItem ? " + 1 free 🎁" : ""}
                     </p>
                   </div>
@@ -1655,7 +1648,7 @@ const Pricelist = () => {
                             onClick={() => handleImageClick(product.images)} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{
-                              fontWeight: 800, fontSize: "15px", color: C.ink,
+                              fontWeight: 800, fontSize: "15px", color: C.ivory,
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                               lineHeight: 1.3,
                             }}>{product.productname}</p>
@@ -1761,7 +1754,7 @@ const Pricelist = () => {
                       <div style={{
                         background: "rgba(46,125,50,0.07)", border: `1.5px solid rgba(46,125,50,0.3)`,
                         borderRadius: "6px", padding: "5px 10px",
-                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.green, fontWeight: 400,
+                        fontFamily: "'Barlow', sans-serif", fontSize: "11px", color: C.crimson, fontWeight: 400,
                       }}>
                         🎁 Lucky Spin unlocked! Spin to win a free gift at checkout.
                       </div>
@@ -2084,8 +2077,8 @@ const Pricelist = () => {
                 cursor: "pointer",
                 alignItems: "center",
                 justifyContent: "center",
-                color: C.crimson,
                 transition: "all 0.2s",
+                color:C.crimson
               }}
               onMouseEnter={e => { e.currentTarget.style.background = C.crimson; e.currentTarget.style.color = "#fff"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = C.crimson; }}
@@ -2100,9 +2093,14 @@ const Pricelist = () => {
               style={{ display: "flex", gap: "12px", overflowX: "auto", padding: "4px 0 8px", scrollbarWidth: "thin", flex: 1 }}
             >
               {productTypes.map(type => (
-                <motion.button key={type} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+                <motion.button 
+                  key={type} 
+                  whileHover={{ scale: 1.05 }} 
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => setSelectedType(type)}
-                  className={`type-chip ${selectedType === type ? "active" : ""}`}>
+                  style={{ color: selectedType === type ? "#fff" : C.crimson }} // Dynamic white text when active
+                  className={`type-chip ${selectedType === type ? "active" : ""}`}
+                >
                   {type}
                 </motion.button>
               ))}
@@ -2137,13 +2135,36 @@ const Pricelist = () => {
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "3rem" }}>
             <p className="label" style={{ marginBottom: "0.5rem" }}>Brand</p>
             <div className="hscroll" style={{ display: "flex", gap: "10px", overflowX: "auto", padding: "4px 0 8px", scrollbarWidth: "thin" }}>
-              {brandList.map(brand => (
-                <motion.button key={brand} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
-                  onClick={() => { setSelectedBrand(brand); setBrandSearchInput(""); setBrandSearchTerm(""); }}
-                  className={`brand-chip ${selectedBrand === brand ? "active" : ""}`}>
-                  {brand === "All" ? <><Tag style={{ width: 11, height: 11, display: "inline", marginRight: 4 }} />All Brands</> : brand}
-                </motion.button>
-              ))}
+              {brandList.map(brand => {
+                const isSelected = selectedBrand === brand;
+                return (
+                  <motion.button 
+                    key={brand} 
+                    whileHover={{ scale: 1.05 }} 
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => { setSelectedBrand(brand); setBrandSearchInput(""); setBrandSearchTerm(""); }}
+                    style={{ 
+                      background: isSelected ? "#1565c0" : "#ffffff", // Blue if selected, white if not
+                      color: isSelected ? C.ink : C.crimson,          // C.ink on blue background, C.crimson on white background
+                      borderColor: isSelected ? "#1565c0" : C.border
+                    }}
+                    className={`brand-chip ${isSelected ? "active" : ""}`}
+                  >
+                    {brand === "All" ? (
+                      <>
+                        <Tag style={{ 
+                          width: 11, 
+                          height: 11, 
+                          display: "inline", 
+                          marginRight: 4, 
+                          color: isSelected ? C.ink : C.crimson // Sync icon color with text rules
+                        }} />
+                        All Brands
+                      </>
+                    ) : brand}
+                  </motion.button>
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -2321,10 +2342,10 @@ const Pricelist = () => {
                         borderTop: `2px dashed rgba(46,125,50,0.35)`,
                       }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "0.35rem" }}>
-                          <Gift style={{ width: 11, height: 11, color: C.green }} />
+                          <Gift style={{ width: 11, height: 11, color: C.crimson }} />
                           <p style={{
                             fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "10px",
-                            letterSpacing: "0.15em", textTransform: "uppercase", color: C.green,
+                            letterSpacing: "0.15em", textTransform: "uppercase", color: C.crimson,
                           }}>Lucky Draw — Free Gift</p>
                         </div>
                         <div style={{
@@ -2342,8 +2363,8 @@ const Pricelist = () => {
                             <span style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 400, color: C.green, fontSize: "13px" }}>₹0</span>
                           </div>
                         </div>
-                        <p style={{
-                          fontSize: "10px", color: C.green, marginTop: 4,
+                        <p className="text-red-300" style={{
+                          fontSize: "12px", marginTop: 4,
                           fontFamily: "'Barlow', sans-serif", fontStyle: "italic", textAlign: "right",
                         }}>* This item is free and not included in the total.</p>
                       </div>

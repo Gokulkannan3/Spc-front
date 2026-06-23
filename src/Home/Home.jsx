@@ -14,23 +14,23 @@ import { API_BASE_URL } from "../../Config"
 import about from "../spc.jpg"
 import need from "../spc.jpg"
 
-/* ─── Design tokens ─────────────────────────────────────────────────────── */
+/* ─── Design tokens (Updated for a cohesive deep regal festive palette) ─── */
 const C = {
-  ivory:    "#fdf8f0",
-  cream:    "#faf3e4",
-  parchment:"#f5e9c9",
-  crimson:  "#c0392b",
-  crimsonD: "#96281b",
-  crimsonL: "#e74c3c",
+  ivory:    "#2a080c", // Deep regal festive wine backdrop (Replaced light ivory)
+  cream:    "#380e12", // Slightly lighter warm wine contrast (Replaced light cream)
+  parchment:"#4a151a", // Deep textured accent boundary (Replaced parchment)
+  crimson:  "#e74c3c", // Vibrant crimson for readability on dark backgrounds
+  crimsonD: "#c0392b", 
+  crimsonL: "#ff6b6b",
   saffron:  "#e67e22",
   saffronL: "#f39c12",
   ember:    "#d35400",
-  charcoal: "#1c1c1e",
-  ink:      "#2c2c2e",
-  slate:    "#4a4a52",
-  muted:    "#7c7c88",
-  border:   "#e8dcc8",
-  borderD:  "#d4c4a0",
+  charcoal: "#1a0406", // Darkest crimson-black for footer base
+  ink:      "#fdf8f0", // Replaced near-black text with warm ivory text for high readability
+  slate:    "#e8dcc8", // Light muted tone for subheaders
+  muted:    "#a29193", // Mid-tone for structural labels
+  border:   "#4a151a", // Dark matching borders
+  borderD:  "#5c1d24",
 }
 
 /* ─── Global styles ─────────────────────────────────────────────────────── */
@@ -38,21 +38,21 @@ const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; }
-    body { background: #fdf8f0; color: #2c2c2e; font-family: 'Barlow', sans-serif; }
+    body { background: #2a080c; color: #fdf8f0; font-family: 'Barlow', sans-serif; }
     .display { sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
     .serif   { font-family: 'Lora', serif; }
-    .label   { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #c0392b; }
-    .stripe-bg { background-image: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(192,57,43,0.025) 6px, rgba(192,57,43,0.025) 7px); }
-    .pill { display:inline-flex; align-items:center; gap:6px; background:#c0392b; color:#fff; font-family:'Barlow',sans-serif; font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
+    .label   { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #e74c3c; }
+    .stripe-bg { background-image: repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(231,76,60,0.025) 6px, rgba(231,76,60,0.025) 7px); }
+    .pill { display:inline-flex; align-items:center; gap:6px; background:#e74c3c; color:#fff; font-family:'Barlow',sans-serif; font-weight:600; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 12px; border-radius:100px; }
     .pill-saffron { background:#e67e22; color:#fff; }
-    .btn-primary { display:inline-flex; align-items:center; gap:10px; background:#c0392b; color:#fff; sans-serif; font-weight:700; font-size:14px; letter-spacing:0.04em; padding:14px 32px; border-radius:4px; border:none; cursor:pointer; transition:all 0.25s ease; }
-    .btn-primary:hover { background:#96281b; transform:translate(-2px,-2px); box-shadow:4px 4px 0 #96281b44; }
-    .btn-outline { display:inline-flex; align-items:center; gap:10px; background:transparent; color:#c0392b; sans-serif; font-weight:700; font-size:13px; letter-spacing:0.04em; padding:12px 28px; border-radius:4px; border:2px solid #c0392b; cursor:pointer; transition:all 0.25s ease; }
-    .btn-outline:hover { background:#c0392b; color:#fff; transform:translate(-2px,-2px); }
+    .btn-primary { display:inline-flex; align-items:center; gap:10px; background:#e74c3c; color:#fff; sans-serif; font-weight:700; font-size:14px; letter-spacing:0.04em; padding:14px 32px; border-radius:4px; border:none; cursor:pointer; transition:all 0.25s ease; }
+    .btn-primary:hover { background:#c0392b; transform:translate(-2px,-2px); box-shadow:4px 4px 0 #c0392b44; }
+    .btn-outline { display:inline-flex; align-items:center; gap:10px; background:transparent; color:#e74c3c; sans-serif; font-weight:700; font-size:13px; letter-spacing:0.04em; padding:12px 28px; border-radius:4px; border:2px solid #e74c3c; cursor:pointer; transition:all 0.25s ease; }
+    .btn-outline:hover { background:#e74c3c; color:#fff; transform:translate(-2px,-2px); }
     ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-track { background:#faf3e4; }
-    ::-webkit-scrollbar-thumb { background:#c0392b; border-radius:3px; }
-    .hscroll { scrollbar-width:thin; scrollbar-color:#c0392b #faf3e4; }
+    ::-webkit-scrollbar-track { background:#380e12; }
+    ::-webkit-scrollbar-thumb { background:#e74c3c; border-radius:3px; }
+    .hscroll { scrollbar-width:thin; scrollbar-color:#e74c3c #380e12; }
     @keyframes spc-pulse {
       0%,100%{opacity:1;transform:scale(1)}
       50%{opacity:0.5;transform:scale(0.7)}
@@ -390,18 +390,18 @@ const Firework = ({ delay=0,startPosition,endPosition,burstPosition,colors,onBur
       {promocode && !copiedPromos.includes(promocode.code) && (
         <motion.div initial={{scale:0,opacity:0}} animate={{scale:1,opacity:1}} transition={{delay:delay+4,duration:0.5}}
           className="absolute pointer-events-auto px-6 py-4 rounded-2xl font-bold text-lg"
-          style={{left:burstPosition.x,top:burstPosition.y,transform:"translate(-50%,-50%)",background:"#fff",border:`3px solid ${C.crimson}`,boxShadow:`6px 6px 0 ${C.crimson},0 0 40px rgba(192,57,43,0.2)`,zIndex:45,maxWidth:sw<768?"260px":"auto"}}>
+          style={{left:burstPosition.x,top:burstPosition.y,transform:"translate(-50%,-50%)",background:"#380e12",border:`3px solid ${C.crimson}`,boxShadow:`6px 6px 0 ${C.crimson},0 0 40px rgba(192,57,43,0.2)`,zIndex:45,maxWidth:sw<768?"260px":"auto"}}>
           <div className="flex items-center gap-3">
             <motion.div animate={{rotate:360}} transition={{duration:2,repeat:Infinity,ease:"linear"}}>
               <Gift className="w-6 h-6" style={{color:C.crimson}}/>
             </motion.div>
             <div className="text-center">
-              <div className="font-extrabold text-xl" style={{color:C.crimson,letterSpacing:"0.08em"}}>{promocode.code}</div>
+              <div className="font-extrabold text-xl" style={{color:C.ink,letterSpacing:"0.08em"}}>{promocode.code}</div>
               <div className="px-3 py-1 rounded-full text-sm font-bold mt-1" style={{background:C.saffron,color:"#fff"}}>{promocode.discount}% OFF</div>
             </div>
             <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
               onClick={()=>{navigator.clipboard.writeText(promocode.code);onCopyPromo(promocode.code)}}
-              className="p-2 rounded-lg transition-all" style={{background:`rgba(192,57,43,0.08)`,border:`1px solid rgba(192,57,43,0.25)`}}>
+              className="p-2 rounded-lg transition-all" style={{background:`rgba(231,76,60,0.08)`,border:`1px solid rgba(231,76,60,0.25)`}}>
               <Copy className="w-4 h-4" style={{color:C.crimson}}/>
             </motion.button>
           </div>
@@ -516,17 +516,17 @@ const ModernCarousel = ({ media }) => {
         <>
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{background:"rgba(0,0,0,0.12)"}}/>
           <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-            style={{background:"rgba(255,255,255,0.92)",border:`1px solid ${C.border}`}}>
+            style={{background:"rgba(56,14,18,0.92)",border:`1px solid ${C.border}`}}>
             <FaArrowLeft style={{color:C.crimson,fontSize:"11px"}}/>
           </button>
           <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"
-            style={{background:"rgba(255,255,255,0.92)",border:`1px solid ${C.border}`}}>
+            style={{background:"rgba(56,14,18,0.92)",border:`1px solid ${C.border}`}}>
             <FaArrowRight style={{color:C.crimson,fontSize:"11px"}}/>
           </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
             {items.map((_,i)=>(
               <button key={i} onClick={()=>setIdx(i)} className="w-2 h-2 rounded-full transition-all"
-                style={{background:i===idx?C.crimson:"rgba(192,57,43,0.3)"}}/>
+                style={{background:i===idx?C.crimson:"rgba(231,76,60,0.3)"}}/>
             ))}
           </div>
         </>
@@ -547,14 +547,14 @@ function StatCard({ icon:Icon,value,label,suffix,delay }) {
   return (
     <motion.div ref={ref} initial={{opacity:0,y:30}} whileInView={{opacity:1,y:0}} transition={{duration:0.6,delay}} viewport={{once:true}}
       className="group relative overflow-hidden text-center"
-      style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:"8px",padding:"2rem 1.5rem",transition:"all 0.3s ease",cursor:"default"}}
+      style={{background:C.cream,border:`1px solid ${C.border}`,borderRadius:"8px",padding:"2rem 1.5rem",transition:"all 0.3s ease",cursor:"default"}}
       onMouseEnter={e=>{e.currentTarget.style.borderColor=C.crimson;e.currentTarget.style.transform="translate(-4px,-4px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimson}`}}
       onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=""}}>
       <div className="absolute -top-1 -right-2 font-extrabold pointer-events-none select-none"
-        style={{color:`rgba(192,57,43,0.05)`,fontSize:"5rem",lineHeight:1}}>{value}</div>
+        style={{color:`rgba(231,76,60,0.05)`,fontSize:"5rem",lineHeight:1}}>{value}</div>
       <div className="relative z-10">
         <div className="w-14 h-14 rounded-lg flex items-center justify-center mb-4 mx-auto transition-transform duration-300 group-hover:scale-110"
-          style={{background:`rgba(192,57,43,0.07)`,border:`1.5px dashed rgba(192,57,43,0.3)`}}>
+          style={{background:`rgba(231,76,60,0.07)`,border:`1.5px dashed rgba(231,76,60,0.3)`}}>
           <Icon className="w-7 h-7" style={{color:C.crimson}}/>
         </div>
         <div className="mb-1">
@@ -618,12 +618,12 @@ export default function Home() {
         {showModal&&selProduct&&(
           <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{background:"rgba(28,28,30,0.55)",backdropFilter:"blur(6px)"}}
+            style={{background:"rgba(26,4,6,0.75)",backdropFilter:"blur(6px)"}}
             onClick={()=>{setShowModal(false);setSelProduct(null)}}>
             <motion.div initial={{scale:0.85,y:30}} animate={{scale:1,y:0}} exit={{scale:0.85,y:30}}
               onClick={e=>e.stopPropagation()}
               className="w-full max-w-lg max-h-[90vh] overflow-y-auto"
-              style={{background:"#fff",border:`2px solid ${C.crimson}`,borderRadius:"8px",boxShadow:`8px 8px 0 ${C.crimson}`}}>
+              style={{background:C.cream,border:`2px solid ${C.crimson}`,borderRadius:"8px",boxShadow:`8px 8px 0 ${C.crimson}`}}>
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
                   <div>
@@ -635,7 +635,7 @@ export default function Home() {
                   </div>
                   <button onClick={()=>{setShowModal(false);setSelProduct(null)}}
                     className="w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all"
-                    style={{background:`rgba(192,57,43,0.08)`,color:C.crimson,border:`1px solid rgba(192,57,43,0.25)`}}>×</button>
+                    style={{background:`rgba(231,76,60,0.08)`,color:C.crimson,border:`1px solid rgba(231,76,60,0.25)`}}>×</button>
                 </div>
                 <ModernCarousel media={selProduct.image}/>
                 <h3 className="text-base font-semibold mb-2" style={{color:C.ink,}}>About this product</h3>
@@ -653,10 +653,10 @@ export default function Home() {
 
       {/* ══════════════════════ HERO ════════════════════════════════════ */}
       <motion.section style={{y:heroY,opacity:heroOpacity}} className="relative hundred:pt-32 mobile:pt-10 pb-0 px-4 sm:px-8 lg:px-12">
-        <div className="hundred:max-w-6xl tab:max-w-6xl tab:mt-32 mobile:-auto mx-auto">
+        <div className="hundred:max-w-6xl tab:max-w-6xl tab:mt-32 tabmb-12 hundred:mb-22 mobile:mb-10 mobile:-auto mx-auto">
           {/* Banner */}
           <div 
-            className="relative rounded-t-2xl overflow-hidden w-full mobile:max-h-[140px] tab:max-h-[100%] hundred:max-h-[100%]"
+            className="relative rounded-t-2xl overflow-hidden w-full mobile:max-h-[140px] tab:max-h-[90%] hundred:max-h-[100%]"
             style={{
               height: "clamp(160px, 45vw, 390px)", 
               border: `2px solid ${C.borderD}`,
@@ -678,7 +678,7 @@ export default function Home() {
                   <img 
                     src={b.image_url.startsWith("https") ? b.image_url : `${API_BASE_URL}${b.image_url}`} 
                     alt={`Banner ${b.id}`} 
-                    className="w-full h-full object-contain bg-[#f5e9c9]"   // ← Changed to contain
+                    className="w-full h-full object-contain bg-[#4a151a]"   
                     style={{ 
                       display: "block",
                       maxWidth: "100%",
@@ -687,7 +687,7 @@ export default function Home() {
                     }}
                   />
                   <div className="absolute inset-0" 
-                    style={{background: "linear-gradient(to right, rgba(28,28,30,0.35) 0%, transparent 65%)"}}/>
+                    style={{background: "linear-gradient(to right, rgba(42,8,12,0.35) 0%, transparent 65%)"}}/>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -710,7 +710,7 @@ export default function Home() {
           </div>
 
           {/* Stats ribbon */}
-          <div className="grid grid-cols-4 divide-x" style={{background:C.crimson,borderRadius:"0 0 12px 12px",boxShadow:`6px 4px 0 ${C.crimsonD}`}}>
+          <div className="grid grid-cols-4 divide-x" style={{background:C.crimsonD,borderRadius:"0 0 12px 12px",boxShadow:`6px 4px 0 ${C.charcoal}`}}>
             {[["200+","Products"],["500+","Clients"],["100%","Satisfaction"],["15+","Years"]].map(([v,l],i)=>(
               <div key={i} className="py-4 text-center" style={{borderRight:i<3?"1px solid rgba(255,255,255,0.2)":undefined}}>
                 <div className="font-extrabold text-xl text-white">{v}</div>
@@ -732,7 +732,7 @@ export default function Home() {
             <div className="flex items-center gap-2 pb-1">
               <div style={{width:"48px",height:"3px",background:C.crimson,borderRadius:"2px"}}/>
               <div style={{width:"16px",height:"3px",background:C.saffron,borderRadius:"2px"}}/>
-              <div style={{width:"8px",height:"3px",background:C.parchment,borderRadius:"2px"}}/>
+              <div style={{width:"8px",height:"3px",background:C.borderD,borderRadius:"2px"}}/>
             </div>
           </div>
           <div className="flex overflow-x-auto gap-5 pb-4 snap-x snap-mandatory hscroll">
@@ -743,7 +743,7 @@ export default function Home() {
                 <motion.div key={product.serial_number}
                   initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} transition={{duration:0.5,delay:i*0.08}} viewport={{once:true}}
                   className="flex-none w-[272px] snap-center"
-                  style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:"8px",overflow:"hidden",transition:"all 0.28s ease"}}
+                  style={{background:C.ivory,border:`1px solid ${C.border}`,borderRadius:"8px",overflow:"hidden",transition:"all 0.28s ease"}}
                   onMouseEnter={e=>{e.currentTarget.style.borderColor=C.crimson;e.currentTarget.style.transform="translate(-4px,-4px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimson}`}}
                   onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=""}}>
                   <div className="relative">
@@ -751,7 +751,7 @@ export default function Home() {
                     <div className="absolute top-3 left-3"><span className="pill">{product.discount}% OFF</span></div>
                     <button onClick={()=>{setSelProduct(product);setShowModal(true)}}
                       className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{background:"#fff",border:`1px solid ${C.border}`}}>
+                      style={{background:C.cream,border:`1px solid ${C.border}`}}>
                       <FaInfoCircle style={{color:C.crimson,fontSize:"14px"}}/>
                     </button>
                   </div>
@@ -773,19 +773,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══════════════════════ ABOUT ═══════════════════════════════════ */}
+      {/* ───══════════════════ ABOUT ═══════════════════════════════════ */}
       <section className="py-24 px-4 sm:px-8 lg:px-12" style={{background:C.ivory}}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{opacity:0,x:-40}} whileInView={{opacity:1,x:0}} transition={{duration:0.7}} viewport={{once:true}} className="relative">
               <div className="relative rounded-lg overflow-hidden" style={{border:`2px solid ${C.borderD}`}}>
                 <img src={about||"/placeholder.svg"} alt="Sree Palaniyappa Crackers" className="w-full h-96 object-cover" style={{display:"block"}}/>
-                <div className="absolute inset-0" style={{background:"linear-gradient(135deg,rgba(192,57,43,0.06) 0%,transparent 60%)"}}/>
+                <div className="absolute inset-0" style={{background:"linear-gradient(135deg,rgba(231,76,60,0.06) 0%,transparent 60%)"}}/>
               </div>
               <div className="absolute -bottom-4 -right-4 w-full h-full rounded-lg -z-10"
-                style={{border:`2px solid ${C.parchment}`,background:C.parchment}}/>
+                style={{border:`2px solid ${C.border}`,background:C.border}}/>
               <div className="absolute -top-5 -left-5 w-20 h-20 rounded-full flex flex-col items-center justify-center"
-                style={{background:C.crimson,border:"4px solid #fff",boxShadow:`4px 4px 0 ${C.crimsonD}`}}>
+                style={{background:C.crimson,border:"4px solid #2a080c",boxShadow:`4px 4px 0 ${C.crimsonD}`}}>
                 <span className="text-white font-extrabold text-xl leading-none">15</span>
                 <span className="text-white text-xs" style={{opacity:0.85,letterSpacing:"0.1em"}}>YRS</span>
               </div>
@@ -800,7 +800,7 @@ export default function Home() {
               <div className="space-y-4" style={{color:C.slate,fontSize:"16px",lineHeight:1.8}}>
                 <p>Sree Palaniyappa Crackers has grown from a passionate hobby into one of Sivakasi's most trusted fireworks establishments — built entirely on the joy of customer celebrations.</p>
                 <p>We deliver uncompromising quality at the most competitive pricing in town, making every festival, wedding, and milestone a night to remember.</p>
-                <p>From manufacturing through wholesale to retail, we stand as a name synonymous with safety, brilliance, and the very best crackers Sivakasi has to offer.</p>
+                <p>From manufacturing through wholesale to retail, we stand as a name synonymous with safety, brilliance, and the very best crackers Sivakasi what to offer.</p>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-lg"
                 style={{background:`rgba(230,126,34,0.07)`,border:`1.5px solid rgba(230,126,34,0.25)`}}>
@@ -829,15 +829,15 @@ export default function Home() {
             {categories.map(({name,icon:Icon,description},i)=>(
               <motion.div key={i}
                 initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} transition={{duration:0.5,delay:i*0.1}} viewport={{once:true}}
-                style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:"8px",padding:"2rem",cursor:"pointer",transition:"all 0.28s ease"}}
+                style={{background:C.ivory,border:`1px solid ${C.border}`,borderRadius:"8px",padding:"2rem",cursor:"pointer",transition:"all 0.28s ease"}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=C.crimson;e.currentTarget.style.transform="translate(-4px,-4px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimson}`}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=""}}>
                 <div className="flex items-center justify-between mb-5">
                   <div className="w-14 h-14 rounded-lg flex items-center justify-center"
-                    style={{background:`rgba(192,57,43,0.07)`,border:`1.5px dashed ${C.crimson}`}}>
+                    style={{background:`rgba(231,76,60,0.07)`,border:`1.5px dashed ${C.crimson}`}}>
                     <Icon className="w-7 h-7" style={{color:C.crimson}}/>
                   </div>
-                  <span style={{fontSize:"3rem",fontWeight:800,color:`rgba(192,57,43,0.07)`,lineHeight:1}}>
+                  <span style={{fontSize:"3rem",fontWeight:800,color:`rgba(231,76,60,0.07)`,lineHeight:1}}>
                     {String(i+1).padStart(2,"0")}
                   </span>
                 </div>
@@ -853,7 +853,7 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════ CTA ═════════════════════════════════════ */}
-      <section className="py-24 px-4 sm:px-8 lg:px-12 relative overflow-hidden" style={{background:C.crimson}}>
+      <section className="py-24 px-4 sm:px-8 lg:px-12 relative overflow-hidden" style={{background:C.crimsonD}}>
         <div className="absolute inset-0 pointer-events-none"
           style={{backgroundImage:"radial-gradient(circle,rgba(255,255,255,0.09) 1px,transparent 1px)",backgroundSize:"28px 28px"}}/>
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
@@ -871,9 +871,9 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4">
               <button onClick={()=>navigate("/price-list")}
                 className="inline-flex items-center gap-3 px-10 py-4 rounded font-bold transition-all duration-250"
-                style={{background:"#fff",color:C.crimson,fontWeight:800,fontSize:"15px",letterSpacing:"0.04em",boxShadow:`4px 4px 0 ${C.crimsonD}`}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.crimsonD}`}}
-                onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=`4px 4px 0 ${C.crimsonD}`}}>
+                style={{background:"#fff",color:C.crimsonD,fontWeight:800,fontSize:"15px",letterSpacing:"0.04em",boxShadow:`4px 4px 0 ${C.charcoal}`}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow=`6px 6px 0 ${C.charcoal}`}}
+                onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=`4px 4px 0 ${C.charcoal}`}}>
                 View Full Price List <ArrowRight className="w-5 h-5"/>
               </button>
               <button onClick={()=>navigate("/contact-us")}
@@ -903,8 +903,8 @@ export default function Home() {
 
       {/* ══════════════════════ FOOTER ══════════════════════════════════ */}
       <footer style={{background:C.charcoal,color:"rgba(255,255,255,0.6)",borderTop:`4px solid ${C.crimson}`}}>
-        <div className="px-4 sm:px-8 lg:px-12 py-3 flex items-center justify-between" style={{background:C.crimson}}>
-          <span className="text-white font-extrabold text-lg" style={{fontFamily:"'Syne',sans-serif",letterSpacing:"0.08em"}}>Sree Palaniyappa Cracakers</span>
+        <div className="px-4 sm:px-8 lg:px-12 py-3 flex items-center justify-between" style={{background:C.crimsonD}}>
+          <span className="text-white font-extrabold text-lg" style={{fontFamily:"'Syne',sans-serif",letterSpacing:"0.08em"}}>Sree Palaniyappa Crackers</span>
           <span className="text-white text-xs" style={{opacity:0.8,fontFamily:"'Barlow',sans-serif",letterSpacing:"0.15em"}}>SIVAKASI · EST. 2009</span>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-14 mobile:mb-5">
