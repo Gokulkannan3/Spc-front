@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaPlus, FaMinus, FaArrowLeft, FaArrowRight, FaInfoCircle, FaExpand, FaCompress } from "react-icons/fa";
+import { FaPlus, FaMinus, FaArrowLeft, FaArrowRight, FaInfoCircle, FaExpand, FaCompress, FaDownload } from "react-icons/fa";
 import { ShoppingCart, Search, Filter, X, Download, Gift, Tag } from "lucide-react";
 import Navbar from "../Component/Navbar";
 import { API_BASE_URL } from "../../Config";
@@ -2147,6 +2147,27 @@ const Pricelist = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Download Pricelist Button - Top Center Below Brands */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "3rem" }}>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={downloadPDF}
+            className="btn-primary"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "14px 32px",
+              fontSize: "14px",
+              boxShadow: `4px 4px 0 ${C.crimsonD}44`,
+            }}
+          >
+            <FaDownload style={{ fontSize: "16px" }} />
+            📄 Download Full Pricelist (PDF)
+          </motion.button>
+        </div>
 
         {Object.entries(grouped).map(([type, items], groupIndex) => (
           <motion.section key={type}
