@@ -802,9 +802,9 @@ const Pricelist = () => {
     doc.setFontSize(12); doc.setFont('helvetica', 'normal'); doc.setTextColor(70, 70, 70);
     doc.text('Website - www.palaniyappacrackers.com', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 8;
-    doc.text('Retail Pricelist - 2025', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('Retail Pricelist - 2026', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 8;
-    doc.text('Contact Number - 9487524689', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('Contact Number - +91 81242 5943', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 20;
 
     const fetchImageAsBase64 = (url) => new Promise((resolve) => {
@@ -2165,7 +2165,7 @@ const Pricelist = () => {
             }}
           >
             <FaDownload style={{ fontSize: "16px" }} />
-            📄 Download Full Pricelist (PDF)
+            📄 Download Full Pricelist
           </motion.button>
         </div>
 

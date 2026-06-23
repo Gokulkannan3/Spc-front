@@ -261,11 +261,11 @@ export default function List() {
 
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('MADHU NISHA CRACKERS', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('SREE PALANIYAPPA CRACKERS', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 10;
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('www.madhunishacrackers.com   |   +91 94875 94689', pageWidth / 2, yOffset, { align: 'center' });
+    doc.text('www.palaniyappacrackers.com   |   +91 81242 5943', pageWidth / 2, yOffset, { align: 'center' });
     yOffset += 10;
     const year = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', year: 'numeric' });
     doc.text(`PRICELIST - ${year}`, pageWidth / 2, yOffset, { align: 'center' });
