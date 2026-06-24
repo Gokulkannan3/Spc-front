@@ -156,8 +156,8 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
             <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.7 }}> / ₹{MIN_PURCHASE}</span>
           </span>
           {isUnlocked && (
-            <span style={{
-              background: "rgba(255,255,255,0.2)", borderRadius: "4px",
+            <span className="bg-green-400" style={{
+              borderRadius: "4px",
               padding: "2px 10px", fontSize: "12px",
               fontWeight: 400,
             }}>View Cart →</span>
@@ -1364,7 +1364,7 @@ const Pricelist = () => {
         fontFamily: "'Barlow', sans-serif", fontWeight: 400, fontSize: "14px",
         paddingTop: "0.4rem", borderTop: `2px solid ${C.parchment}`, color: C.crimson,
       }}>
-        <span>Total</span><span>₹{totals.total}</span>
+        <span className="text-white">Total</span><span className="text-white hundred:text-xl font-semibold mobile:text-xl">₹{totals.total}</span>
       </div>
     </div>
   );
@@ -1404,7 +1404,7 @@ const Pricelist = () => {
         />
       )} 
       
-      <div>
+      <div className={`${isCartOpen ? 'mobile:hidden' : ''}`}>
         <Navbar/>
       </div>
 
@@ -1647,8 +1647,8 @@ const Pricelist = () => {
                             style={{ width: 38, height: 38, borderRadius: "5px", objectFit: "cover", border: `1px solid ${C.border}`, cursor: "pointer", flexShrink: 0 }}
                             onClick={() => handleImageClick(product.images)} />
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{
-                              fontWeight: 800, fontSize: "15px", color: C.ivory,
+                            <p className="text-white" style={{
+                              fontWeight: 800, fontSize: "15px",
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                               lineHeight: 1.3,
                             }}>{product.productname}</p>
@@ -1664,8 +1664,8 @@ const Pricelist = () => {
                             </p>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
-                            <button onClick={() => removeFromCart(product)} style={{
-                              width: 24, height: 24, background: C.parchment, color: C.crimson,
+                            <button className="bg-white" onClick={() => removeFromCart(product)} style={{
+                              width: 24, height: 24, color: C.crimson,
                               border: `1px solid ${C.borderD}`, borderRadius: "4px", cursor: "pointer",
                               display: "flex", alignItems: "center", justifyContent: "center",
                             }}><FaMinus style={{ fontSize: 8 }} /></button>
