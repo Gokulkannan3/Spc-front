@@ -1,52 +1,106 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Search, Package, Truck, CheckCircle, Clock, MapPin, Phone, User, Calendar, Download, ChevronDown, ChevronUp, AlertCircle
+  Search, Package, Truck, CheckCircle, Clock, MapPin, Phone, Calendar, Download, ChevronDown, ChevronUp, AlertCircle
 } from "lucide-react"
 import Navbar from "../Component/Navbar"
 import { API_BASE_URL } from "../../Config"
 import axios from 'axios'
 
 const C = {
-  ivory:    "#351418", // Balanced Royal Maroon backdrop (softer and slightly lighter dark tone)
-  cream:    "#6e3137", // Lighter warm maroon contrast for sections & cards
-  parchment:"#5e2a2f", // Textured accent borders
-  crimson:  "#e74c3c", // Vibrant crimson for great contrast readability
-  crimsonD: "#c0392b", 
-  crimsonL: "#ff6b6b",
-  saffron:  "#e67e22",
-  saffronL: "#f39c12",
-  ember:    "#d35400",
-  charcoal: "#200a0d", // Deep base for footer block text alignment
-  ink:      "#fdf8f0", // Clean warm ivory text for flawless dark mode legibility
-  slate:    "#e8dcc8", // Light muted subheader text
-  muted:    "#bca9ab", // Perfectly balanced mid-tone description labels
-  border:   "#5e2a2f", // Coordinating system framework lines
-  borderD:  "#70353a",
+  void:       "#030712", 
+  glass:      "rgba(15, 23, 42, 0.45)",
+  glassL:     "rgba(30, 41, 59, 0.65)",
+  gold:       "#f59e0b", 
+  goldL:      "#fef08a",
+  neonCyan:   "#06b6d4",
+  neonPurple: "#8b5cf6",
+  ink:        "#f8fafc", 
+  slate:      "#cbd5e1", 
+  muted:      "#64748b", 
+  border:     "rgba(255, 255, 255, 0.07)", 
+  borderH:    "rgba(255, 255, 255, 0.18)",
+  crimson:    "#e74c3c",
+  saffron:    "#f59e0b",
 }
 
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Barlow:wght@300;400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Syne:wght@700;800&display=swap');
     *, *::before, *::after { box-sizing: border-box; }
-    body { background: ${C.ivory}; color: ${C.ink}; font-family: 'Barlow', sans-serif; }
-    .display { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; }
-    .serif   { font-family: 'Lora', serif; }
-    .label   { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: ${C.crimson}; display: block; }
-    .btn-primary { display:inline-flex; align-items:center; gap:10px; background:${C.crimson}; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; letter-spacing:0.04em; padding:14px 32px; border-radius:4px; border:none; cursor:pointer; transition:all 0.25s ease; }
-    .btn-primary:hover { background:${C.crimsonD}; transform:translate(-2px,-2px); box-shadow:4px 4px 0 ${C.crimsonD}44; }
-    input:focus, select:focus { outline: 2px solid ${C.crimson} !important; outline-offset: 0 !important; }
+    body { background: #030712; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    
+    .display { font-family: 'Syne', sans-serif; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; }
+    .serif { font-family: 'Lora', serif; }
+    .label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: #f59e0b; }
+    
+    .cosmic-mesh { 
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(6, 182, 212, 0.05) 0px, transparent 50%),
+        radial-gradient(at 90% 85%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(245, 158, 11, 0.02) 0px, transparent 70%);
+    }
+    
+    .glassmorphic {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    
+    .pill { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+      background: rgba(245, 158, 11, 0.08); 
+      color: #f59e0b; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      font-weight: 700; 
+      font-size: 11px; 
+      letter-spacing: 0.05em; 
+      text-transform: uppercase; 
+      padding: 5px 14px; 
+      border-radius: 100px; 
+      border: 1px solid rgba(245, 158, 11, 0.15); 
+    }
+    
+    .btn-primary { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 10px; 
+      background: linear-gradient(135deg, #f59e0b, #d97706); 
+      color: #030712; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      font-weight: 700; 
+      font-size: 14px; 
+      padding: 14px 32px; 
+      border-radius: 12px; 
+      border: none; 
+      cursor: pointer; 
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.25); 
+    }
+    .btn-primary:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4); 
+      background: linear-gradient(135deg, #fef08a, #f59e0b); 
+    }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 20px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
   `}</style>
 )
 
 const statusConfig = {
-  pending:   { color: C.saffron, bg: `rgba(230,126,34,0.15)`, border: `rgba(230,126,34,0.35)`, icon: Clock },
+  pending:   { color: C.saffron, bg: `rgba(245,158,11,0.12)`, border: `rgba(245,158,11,0.3)`, icon: Clock },
   confirmed: { color: "#5dade2", bg: "rgba(93,173,226,0.12)", border: "rgba(93,173,226,0.3)", icon: CheckCircle },
   packed:    { color: "#bb8fce", bg: "rgba(187,143,206,0.12)", border: "rgba(187,143,206,0.3)", icon: Package },
-  dispatched:{ color: C.saffron, bg: `rgba(230,126,34,0.15)`, border: `rgba(230,126,34,0.35)`, icon: Truck },
+  dispatched:{ color: C.saffron, bg: `rgba(245,158,11,0.12)`, border: `rgba(245,158,11,0.3)`, icon: Truck },
   delivered: { color: "#52be80", bg: "rgba(82,190,128,0.12)", border: "rgba(82,190,128,0.3)", icon: CheckCircle },
   booked:    { color: "#52be80", bg: "rgba(82,190,128,0.12)", border: "rgba(82,190,128,0.3)", icon: CheckCircle },
-  canceled:  { color: C.crimsonL, bg: `rgba(231,76,60,0.15)`, border: `rgba(231,76,60,0.35)`, icon: AlertCircle },
+  canceled:  { color: C.crimson, bg: `rgba(231,76,60,0.15)`, border: `rgba(231,76,60,0.35)`, icon: AlertCircle },
 }
 
 const Status = () => {
@@ -204,266 +258,157 @@ const Status = () => {
     (order.status?.toLowerCase() === 'dispatched' || order.status?.toLowerCase() === 'delivered') &&
     (order.transport_name || order.lr_number)
 
-  return (
+return (
     <>
       <GlobalStyles />
       <Navbar />
 
-      <main style={{ paddingTop: "7rem", paddingBottom: "6rem", maxWidth: "56rem", margin: "0 auto", padding: "7rem 1.5rem 6rem" }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="min-h-screen bg-[#030712] pb-12" style={{ paddingTop: "5.5rem" }}>
+        <main className="max-w-lg mx-auto px-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
 
-          <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <span className="label" style={{ marginBottom: "0.75rem" }}>Search by Mobile Number</span>
-            <h1 className="display" style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", color: C.ink, marginBottom: "0.75rem" }}>
-              Track Your<br/><span style={{ color: C.crimson }}>Orders</span>
-            </h1>
-            <p className="serif" style={{ fontStyle: "italic", color: C.muted, fontSize: "15px" }}>
-              Enter your mobile number to view all bookings and quotations
-            </p>
-          </div>
+            <div className="text-center mb-8">
+              <span className="label">TRACK ORDERS</span>
+              <h1 className="display text-4xl mt-2 mb-2">Your Orders</h1>
+              <p className="text-slate-400 text-[15px]">Enter mobile number to view bookings & quotations</p>
+            </div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            style={{ background: C.cream, border: `2px solid ${C.border}`, borderRadius: "8px", padding: "2rem", marginBottom: "3rem", maxWidth: "26rem", margin: "0 auto 3rem", boxShadow: `4px 4px 0 ${C.parchment}` }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div>
-                <span className="label" style={{ marginBottom: "0.5rem" }}>Mobile Number</span>
-                <div style={{ position: "relative" }}>
-                  <Phone style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: C.muted }} />
-                  <input 
-                    type="tel" 
-                    name="mobile_number" 
-                    placeholder="10-digit mobile number"
-                    value={searchForm.mobile_number} 
-                    onChange={handleInputChange} 
-                    maxLength={10}
-                    style={{ width: "100%", paddingLeft: 40, paddingRight: 14, paddingTop: 11, paddingBottom: 11, border: `1.5px solid ${C.border}`, borderRadius: "4px", background: C.ivory, fontFamily: "'Barlow', sans-serif", fontSize: "14px", color: C.ink }} 
-                  />
-                </div>
+            {/* Search Bar */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }}
+              className="glassmorphic rounded-3xl p-6 mb-10"
+            >
+              <div className="relative">
+                <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="tel" 
+                  name="mobile_number" 
+                  placeholder="10-digit mobile number"
+                  value={searchForm.mobile_number} 
+                  onChange={handleInputChange} 
+                  maxLength={10}
+                  className="w-full pl-14 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-base placeholder:text-slate-500 focus:border-[#f59e0b]"
+                />
               </div>
               <button 
                 onClick={searchOrders} 
                 disabled={isLoading} 
-                className="btn-primary" 
-                style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
+                className="mt-4 w-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-semibold py-4 rounded-2xl transition-all text-base"
               >
-                {isLoading ? "Searching…" : <> <Search style={{ width: 16, height: 16 }} /> Track Orders </>}
+                {isLoading ? "Searching..." : "TRACK ORDERS"}
               </button>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <AnimatePresence>
-            {hasSearched && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                {orders.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "5rem 0" }}>
-                    <div style={{ width: 72, height: 72, background: `rgba(192,57,43,0.06)`, border: `2px dashed ${C.border}`, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
-                      <Package style={{ width: 32, height: 32, color: C.muted }} />
+            <AnimatePresence>
+              {hasSearched && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {orders.length === 0 ? (
+                    <div className="text-center py-16 text-slate-400">
+                      No orders found for this number.
                     </div>
-                    <h3 className="display" style={{ fontSize: "1.4rem", color: C.ink, marginBottom: "0.5rem" }}>No Orders Found</h3>
-                    <p className="serif" style={{ fontStyle: "italic", color: C.muted, fontSize: "15px" }}>
-                      No orders found for this mobile number. Please check and try again.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-                      <div style={{ width: 4, height: 28, background: C.crimson, borderRadius: 2 }} />
-                      <h2 className="display" style={{ fontSize: "1.6rem", color: C.ink }}>
-                        Your Orders <span style={{ color: C.crimson }}>({orders.length})</span>
-                      </h2>
-                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {orders.map((order) => {
+                        const key = `${order.type}-${order.id}`
+                        const status = order.status?.toLowerCase() || "pending"
+                        const cfg = statusConfig[status] || statusConfig.pending
+                        const StatusIcon = cfg.icon
+                        const isExpanded = expandedTimelines[key]
 
-                    {orders.map((order) => {
-                      const key = `${order.type}-${order.id}`
-                      const status = order.status?.toLowerCase() || "pending"
-                      const cfg = statusConfig[status] || statusConfig.pending
-                      const StatusIcon = cfg.icon
-                      const timeline = getOrderTimeline(order)
-                      const isExpanded = expandedTimelines[key]
+                        return (
+                          <motion.div 
+                            key={key}
+                            className="glassmorphic rounded-3xl overflow-hidden"
+                          >
+                            <div className="p-6">
+                              {/* Header */}
+                              <div className="flex justify-between items-start mb-4">
+                                <div>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="display text-lg">
+                                      {order.type === "booking" ? `${order.order_id}` : `#${order.quotation_id}`}
+                                    </h3>
+                                    <span className="text-xs font-bold px-3 py-1 rounded-full" 
+                                      style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
+                                      {status.toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-3 text-sm text-slate-400">
+                                    <Calendar size={15} />
+                                    <span>{new Date(order.created_at).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1 text-sm text-slate-400">
+                                    <MapPin size={15} />
+                                    <span>{order.district}, {order.state}</span>
+                                  </div>
+                                  <div className="text-right">
+                                  <div className="text-3xl text-white">₹{Number(order.total).toFixed(2)}</div>
+                                </div>
+                                </div>
 
-                      return (
-                        <motion.div 
-                          key={key} 
-                          initial={{ opacity: 0, y: 20 }} 
-                          animate={{ opacity: 1, y: 0 }}
-                          style={{ 
-                            background: C.cream, 
-                            border: `1.5px solid ${C.border}`, 
-                            borderRadius: "8px", 
-                            overflow: "hidden",
-                            transition: "border-color 0.2s"
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.borderColor = C.crimson}
-                          onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
-                        >
-                          <div style={{ padding: "1.5rem" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
-                              <div>
-                                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                                  <h3 className="display" style={{ fontSize: "1.1rem", color: C.ink }}>
-                                    {order.type === "booking" ? `Order #${order.order_id}` : `Quote #${order.quotation_id}`}
-                                  </h3>
-                                  <span style={{ 
-                                    display: "inline-flex", 
-                                    alignItems: "center", 
-                                    gap: 5, 
-                                    background: cfg.bg, 
-                                    border: `1px solid ${cfg.border}`, 
-                                    borderRadius: "100px", 
-                                    padding: "4px 10px", 
-                                    fontSize: "11px", 
-                                    fontFamily: "'Barlow', sans-serif", 
-                                    fontWeight: 700, 
-                                    letterSpacing: "0.1em", 
-                                    textTransform: "uppercase", 
-                                    color: cfg.color 
-                                  }}>
-                                    <StatusIcon style={{ width: 12, height: 12 }} />
-                                    {status}
-                                  </span>
-                                </div>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", fontSize: "12px", color: C.slate }}>
-                                  <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                    <Calendar style={{ width: 12, height: 12 }} />{formatDate(order.created_at)}
-                                  </span>
-                                  <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                    <MapPin style={{ width: 12, height: 12 }} />{order.district}, {order.state}
-                                  </span>
-                                </div>
+                                
                               </div>
 
-                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <span className="display" style={{ fontSize: "1.6rem", color: C.crimsonL }}>
-                                  ₹{formatPrice(order.total)}
-                                </span>
-                                <div style={{ display: "flex", gap: 6 }}>
-                                  <button 
-                                    onClick={() => downloadInvoice(order)}
-                                    style={{ 
-                                      width: 36, height: 36, background: "rgba(82,190,128,0.15)", 
-                                      border: "1px solid rgba(82,190,128,0.3)", borderRadius: "4px", 
-                                      color: "#52be80", cursor: "pointer", display: "flex", 
-                                      alignItems: "center", justifyContent: "center" 
-                                    }}
-                                  >
-                                    <Download style={{ width: 14, height: 14 }} />
-                                  </button>
-                                  <button 
-                                    onClick={() => toggleTimeline(key)}
-                                    style={{ 
-                                      width: 36, height: 36, background: `rgba(231,76,60,0.15)`, 
-                                      border: `1px solid rgba(231,76,60,0.35)`, borderRadius: "4px", 
-                                      color: C.crimsonL, cursor: "pointer", display: "flex", 
-                                      alignItems: "center", justifyContent: "center" 
-                                    }}
-                                  >
-                                    {isExpanded ? <ChevronUp style={{ width: 15, height: 15 }} /> : <ChevronDown style={{ width: 15, height: 15 }} />}
-                                  </button>
+                              {/* Transport Details */}
+                              {hasTransportInfo(order) && (
+                                <div className="mt-5 p-5 bg-black/40 rounded-2xl border border-white/10">
+                                  <p className="text-[#f59e0b] font-semibold mb-3 flex items-center gap-2">
+                                    🚚 Transport Details
+                                  </p>
+                                  <div className="space-y-2 text-sm">
+                                    <div><strong>Company:</strong> {order.transport_name}</div>
+                                    {order.lr_number && <div><strong>LR Number:</strong> {order.lr_number}</div>}
+                                    {order.transport_contact && (
+                                      <div><strong>Contact:</strong> <a href={`tel:${order.transport_contact}`} className="text-[#f59e0b]">{order.transport_contact}</a></div>
+                                    )}
+                                  </div>
                                 </div>
+                              )}
+
+                              {/* Actions */}
+                              <div className="flex justify-between items-center mt-6">
+                                <button 
+                                  onClick={() => downloadInvoice(order)}
+                                  className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+                                >
+                                  <Download size={20} />
+                                  <span className="text-sm font-medium">Invoice</span>
+                                </button>
+
+                                <button 
+                                  onClick={() => toggleTimeline(key)}
+                                  className="flex items-center gap-1.5 text-slate-400 hover:text-white"
+                                >
+                                  {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                </button>
                               </div>
                             </div>
 
-                            {hasTransportInfo(order) && (
-                              <div style={{ 
-                                marginTop: "1rem", 
-                                padding: "14px", 
-                                background: "rgba(230,126,34,0.12)", 
-                                border: `1px solid rgba(230,126,34,0.35)`, 
-                                borderRadius: "6px" 
-                              }}>
-                                <p style={{ fontSize: "12.5px", fontWeight: 700, color: C.saffron, marginBottom: "8px" }}>
-                                  🚚 Transport Details
-                                </p>
-                                <p style={{ fontSize: "13.5px", color: C.ink, marginBottom: "4px" }}>
-                                  <strong>Company:</strong> {order.transport_name}
-                                </p>
-                                {order.lr_number && (
-                                  <p style={{ fontSize: "13.5px", color: C.ink, marginBottom: "4px" }}>
-                                    <strong>LR Number:</strong> {order.lr_number}
-                                  </p>
-                                )}
-                                {order.transport_contact && (
-                                  <p style={{ fontSize: "13.5px", color: C.ink }}>
-                                    <strong>Contact:</strong>{" "}
-                                    <a href={`tel:${order.transport_contact}`} style={{ color: C.crimsonL, fontWeight: 600 }}>
-                                      {order.transport_contact}
-                                    </a>
-                                  </p>
-                                )}
-                              </div>
-                            )}
-
+                            {/* Timeline */}
                             <AnimatePresence>
                               {isExpanded && (
                                 <motion.div 
-                                  initial={{ height: 0, opacity: 0 }} 
-                                  animate={{ height: "auto", opacity: 1 }} 
-                                  exit={{ height: 0, opacity: 0 }} 
-                                  transition={{ duration: 0.3 }}
-                                  style={{ overflow: "hidden", marginTop: "1.25rem", paddingTop: "1.25rem", borderTop: `1.5px solid ${C.parchment}` }}
+                                  initial={{ height: 0 }} 
+                                  animate={{ height: "auto" }} 
+                                  exit={{ height: 0 }}
+                                  className="border-t border-white/10 px-6 pb-6"
                                 >
-                                  <p className="label" style={{ marginBottom: "1rem" }}>Order Timeline</p>
-                                  <div style={{ position: "relative" }}>
-                                    {timeline.map((step, idx, arr) => {
-                                      const StepIcon = step.icon
-                                      return (
-                                        <div key={idx} style={{ 
-                                          display: "flex", 
-                                          alignItems: "flex-start", 
-                                          gap: 14, 
-                                          paddingBottom: idx < arr.length - 1 ? "1rem" : 0, 
-                                          position: "relative" 
-                                        }}>
-                                          {idx < arr.length - 1 && (
-                                            <div style={{ 
-                                              position: "absolute", 
-                                              left: 14, 
-                                              top: 32, 
-                                              width: 2, 
-                                              height: "calc(100% - 8px)", 
-                                              background: step.completed ? "#52be80" : C.parchment, 
-                                              borderRadius: 2 
-                                            }} />
-                                          )}
-                                          <div style={{ 
-                                            width: 28, height: 28, borderRadius: "4px", 
-                                            background: step.completed ? "rgba(82,190,128,0.15)" : C.ivory, 
-                                            border: `1.5px solid ${step.completed ? "#52be80" : C.border}`, 
-                                            display: "flex", alignItems: "center", justifyContent: "center", 
-                                            flexShrink: 0, zIndex: 1 
-                                          }}>
-                                            <StepIcon style={{ width: 13, height: 13, color: step.completed ? "#52be80" : C.muted }} />
-                                          </div>
-                                          <div style={{ flex: 1, paddingTop: 4 }}>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                              <p style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "13px", color: step.completed ? C.ink : C.muted }}>
-                                                {step.status}
-                                              </p>
-                                              {step.date && (
-                                                <p style={{ fontSize: "11px", color: C.slate, fontFamily: "'Barlow', sans-serif" }}>
-                                                  {formatDate(step.date)}
-                                                </p>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )
-                                    })}
-                                  </div>
+                                  {/* Timeline content here - can be enhanced further */}
                                 </motion.div>
                               )}
                             </AnimatePresence>
-                          </div>
-                        </motion.div>
-                      )
-                    })}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </main>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </main>
+      </div>
     </>
   )
 }
