@@ -141,7 +141,7 @@ const MinPurchasePipeline = memo(({ subtotalRaw, onCartOpen, isUnlocked }) => {
         <div style={{ display: "flex", alignItems: "center", minWidth: 0, flex: 1 }}>
           {isUnlocked ? (
             <span className="display" style={{ fontSize: "clamp(13px, 3.5vw, 16px)", color: C.gold, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              🎉 Minimum Met! Access Cart
+              🎉 Open Cart
             </span>
           ) : (
             <span style={{ fontWeight: 700, fontSize: "clamp(12px, 3.2vw, 15px)", color: C.slate, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -222,17 +222,7 @@ const ProductCard = memo(({ product, count, onAdd, onRemove, onShowDetails, onIm
       <div style={{ position: "relative" }}>
         <ModernCarousel media={product.images} onImageClick={() => onImageClick(product.images)} />
         <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6, flexWrap: "wrap", zIndex: 10 }}>
-          {product.discount > 0 && <span className="pill bg-amber-500/10 backdrop-blur-md">{formatPercentage(product.discount)}% OFF</span>}
-          {isSelected && (
-            <motion.span
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="pill pill-green bg-emerald-500/10 backdrop-blur-md"
-              style={{ fontSize: "10px" }}
-            >
-              ✓ In Cart
-            </motion.span>
-          )}
+          {product.discount > 0 && <span className="bg-yellow-600/70 w-15 flex justify-center rounded-full p-1 backdrop-blur-md">{formatPercentage(product.discount)}%</span>}
         </div>
         <button
           onClick={() => onShowDetails(product)}
@@ -1825,7 +1815,7 @@ const Pricelist = () => {
         )}
       </AnimatePresence>
 
-      <main className="hundred:pt-10 mobile:-translate-y-12" style={{paddingBottom: "8rem", maxWidth: "80rem", margin: "0 auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
+      <main className="hundred:pt-10 mobile:-translate-y-1" style={{paddingBottom: "8rem", maxWidth: "80rem", margin: "0 auto", paddingLeft: "1.5rem", paddingRight: "1.5rem" }}>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: "3rem" }}>
           <div>
@@ -1833,17 +1823,24 @@ const Pricelist = () => {
             <h1 className="display text-3xl md:text-5xl mobile:text-xl" style={{ color: C.ink, marginTop: 4 }}>Happy Shopping</h1>
           </div>
           
-          {/* <div style={{ display: "flex", gap: 12, flexWrap: "wrap", width: "100%" }}>
-            <div style={{ flex: 1, minWidth: "260px" }} className="search-input-group">
-              <Search className="icon" style={{ color: C.muted, width: 16, height: 16 }} />
-              <input type="text" value={searchInput} onChange={handleSearchInputChange}
-                placeholder="Search products by nomenclature or identifier matrix..."
-                style={{ background: "rgba(15,23,42,0.4)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", color: C.ink, padding: "12px 14px 12px 42px" }} />
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex min-w-[200px] relative">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={handleSearchInputChange}
+                placeholder="Search products"
+                className="w-[200px] bg-[rgba(15,23,42,0.4)] border border-[rgba(255,255,255,0.06)] 
+                          rounded-2xl text-white py-3 px-5 pl-11 focus:outline-none focus:border-yellow-500 transition-colors"
+              />
             </div>
-            <button onClick={() => setShowAiModal(true)} className="btn-outline" style={{ borderRadius: "12px" }}>
-              🤖 Smart Purchase
+            <button
+              onClick={() => setShowAiModal(true)}
+              className="btn-outline whitespace-nowrap px-5 py-3 rounded-2xl flex items-center gap-2 hover:bg-white/10 transition-colors"
+            >
+              🤖 <span>Smart-AI</span>
             </button>
-          </div> */}
+          </div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginBottom: "1.5rem" }}>
@@ -1890,7 +1887,7 @@ const Pricelist = () => {
 
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "4rem" }}>
           <button onClick={downloadPDF} className="btn-outline" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-            <FaDownload style={{ fontSize: "14px", color: C.gold }} /> Export Sheet Document (PDF)
+            <FaDownload style={{ fontSize: "14px", color: C.gold }} /> Download Pricelist
           </button>
         </div>
 

@@ -662,12 +662,15 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <motion.section style={{ y: heroY, opacity: heroOpacity }} className="relative pt-36 pb-12 px-4 sm:px-8 lg:px-12">
+      <motion.section 
+        style={{ y: heroY, opacity: heroOpacity }} 
+        className="relative pt-20 md:pt-32 pb-8 md:pb-12 px-4 sm:px-8 lg:px-12"
+      >
         <div className="max-w-6xl mx-auto">
           <div 
-            className="relative rounded-2xl overflow-hidden w-full glassmorphic"
+            className="relative rounded-t-2xl overflow-hidden w-full glassmorphic"
             style={{
-              height: "clamp(220px, 45vw, 450px)", 
+              height: "clamp(150px, 38vw, 420px)",   // Reduced on mobile
               boxShadow: "0 30px 70px rgba(0,0,0,0.8)"
             }}
           >
@@ -679,7 +682,7 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }} 
                   exit={{ opacity: 0 }} 
                   transition={{ duration: 0.5 }} 
-                  className="absolute inset-0 flex items-center justify-center bg-slate-950/40"
+                  className="absolute h-full inset-0 flex items-center justify-center bg-slate-950/40"
                 >
                   <img 
                     src={b.image_url.startsWith("https") ? b.image_url : `${API_BASE_URL}${b.image_url}`} 
@@ -692,7 +695,7 @@ export default function Home() {
             </AnimatePresence>
 
             {banners.length > 1 && (
-              <div className="absolute bottom-6 right-6 flex gap-2 z-10">
+              <div className="absolute bottom-4 right-4 flex gap-2 z-10">
                 {banners.map((_, i) => (
                   <button 
                     key={i} 
@@ -708,10 +711,11 @@ export default function Home() {
             )}
           </div>
 
+          {/* Stats Bar */}
           <div className="grid grid-cols-4 border-x border-b bg-slate-900/20 backdrop-blur-xl rounded-b-2xl" style={{ borderColor: C.border }}>
-            {[["200+", "Products"], ["500+", "Clients"], ["100%", "Satisfaction"], ["15+", "Years"]].map(([v, l], i) => (
-              <div key={i} className="py-5 text-center border-r last:border-0" style={{ borderColor: C.border }}>
-                <div className="font-extrabold text-2xl text-white tracking-tight">{v}</div>
+            {[["200+", "Products"], ["500+", "Clients"], ["100%", "Satisfied"], ["15+", "Years"]].map(([v, l], i) => (
+              <div key={i} className="py-4 md:py-5 text-center border-r last:border-0" style={{ borderColor: C.border }}>
+                <div className="font-extrabold text-xl md:text-2xl text-white tracking-tight">{v}</div>
                 <div className="text-xs uppercase font-bold tracking-widest mt-1" style={{ color: C.slate }}>{l}</div>
               </div>
             ))}
@@ -719,7 +723,7 @@ export default function Home() {
         </div>
       </motion.section>
 
-      <section className="py-28 px-4 sm:px-8 lg:px-12 border-y bg-slate-950/20 backdrop-blur-md" style={{ borderColor: C.border }}>
+      <section className="py-2 px-4 sm:px-8 lg:px-12 border-y bg-slate-950/20 backdrop-blur-md" style={{ borderColor: C.border }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
             <div>
