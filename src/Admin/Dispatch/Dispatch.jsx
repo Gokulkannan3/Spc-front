@@ -140,134 +140,141 @@ export default function Dispatch() {
   };
 
   const generatePackingPDF = async (booking) => {
-    try {
-      const { jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
-
-      const doc = new jsPDF();
-      const pageW = doc.internal.pageSize.getWidth();
-      const marginL = 14;
-      const contentW = pageW - marginL * 2;
-
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(234, 88, 12);
-      doc.text('MADHU NISHA CRACKERS', pageW / 2, 18, { align: 'center' });
-
-      doc.setFontSize(8.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 100, 100);
-      doc.text('www.madhunishacrackers.com  |  +91 94875 24689', pageW / 2, 25, { align: 'center' });
-
-      doc.setDrawColor(234, 88, 12);
-      doc.setLineWidth(0.8);
-      doc.line(marginL, 29, marginL + contentW, 29);
-
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(40, 40, 40);
-      doc.text('PACKING SLIP', marginL, 38);
-
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.4);
-      doc.line(marginL, 41, marginL + contentW, 41);
-
-      const boxY = 46;
-      const boxH = 52;
-      const halfW = contentW / 2 - 4;
-
-      doc.setDrawColor(220, 220, 220);
-      doc.setLineWidth(0.5);
-      doc.rect(marginL, boxY, halfW, boxH);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(150, 150, 150);
-      doc.text('FROM', marginL + 4, boxY + 7);
-      doc.setFontSize(9);
-      doc.setTextColor(40, 40, 40);
-      doc.text('Madhu Nisha Crackers', marginL + 4, boxY + 16);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(80, 80, 80);
-      doc.text('Sivakasi, Tamil Nadu', marginL + 4, boxY + 24);
-      doc.text('+91 94875 24689', marginL + 4, boxY + 32);
-      doc.text('madhunishacrackers@gmail.com', marginL + 4, boxY + 40);
-
-      const shipX = marginL + halfW + 8;
-      doc.rect(shipX, boxY, halfW, boxH);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(150, 150, 150);
-      doc.text('SHIP TO', shipX + 4, boxY + 7);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(40, 40, 40);
-      doc.text(booking.customer_name || 'N/A', shipX + 4, boxY + 16, { width: halfW - 8 });
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(80, 80, 80);
-      let addr = booking.address || '';
-      if (addr.length > 40) addr = addr.substring(0, 37) + '…';
-      doc.text(addr, shipX + 4, boxY + 24, { width: halfW - 8 });
-      const distState = [booking.district, booking.state].filter(Boolean).join(', ');
-      doc.text(distState, shipX + 4, boxY + 32);
-      doc.text(`Mobile: ${booking.mobile_number || 'N/A'}`, shipX + 4, boxY + 40);
-
-      const metaY = boxY + boxH + 8;
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Order ID:`, marginL, metaY);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(40, 40, 40);
-      doc.text(booking.order_id || 'N/A', marginL + 20, metaY);
-
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.4);
-      doc.line(marginL, metaY + 4, marginL + contentW, metaY + 4);
-
-      let products = [];
       try {
-        products = typeof booking.products === 'string' ? JSON.parse(booking.products) : (booking.products || []);
-      } catch { products = []; }
-
-      const tableRows = products.map((p, i) => [i + 1, p.productname || 'N/A', p.quantity || 1]);
-
-      autoTable(doc, {
-        startY: metaY + 10,
-        head: [['Sl.No', 'Product Name', 'Quantity']],
-        body: tableRows,
-        theme: 'grid',
-        styles: { fontSize: 9, cellPadding: 4 },
-        headStyles: {
-          fillColor: [255, 255, 255], textColor: [40, 40, 40], fontStyle: 'bold',
-          halign: 'center', lineColor: [200, 200, 200], lineWidth: 0.3,
-        },
-        columnStyles: {
-          0: { cellWidth: 18, halign: 'center' },
-          1: { cellWidth: 'auto', halign: 'left' },
-          2: { cellWidth: 28, halign: 'center' },
-        },
-        alternateRowStyles: { fillColor: [255, 247, 237] },
-      });
-
-      const finalY = doc.lastAutoTable.finalY + 10;
-      doc.setDrawColor(234, 88, 12);
-      doc.setLineWidth(0.6);
-      doc.line(marginL, finalY, marginL + contentW, finalY);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(120, 120, 120);
-      doc.text('Thank you for your business with Madhu Nisha Crackers, Sivakasi', pageW / 2, finalY + 7, { align: 'center' });
-
-      const safeCustomerName = (booking.customer_name || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      doc.save(`${safeCustomerName}-${booking.order_id}-packing.pdf`);
-      toast.success("Packing slip downloaded!", { position: "top-center", autoClose: 5000 });
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to generate packing slip.", { position: "top-center", autoClose: 5000 });
-    }
-  };
+        const { jsPDF } = await import('jspdf');
+        const { default: autoTable } = await import('jspdf-autotable');
+  
+        const doc = new jsPDF();
+        const pageW = doc.internal.pageSize.getWidth();
+        const marginL = 14;
+        const contentW = pageW - marginL * 2;
+  
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(234, 88, 12);
+        doc.text('SREE PALANIYAPPA CRACKERS', pageW / 2, 18, { align: 'center' });
+  
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('www.palaniyappacrackers.com  |  +91 81242 59430', pageW / 2, 25, { align: 'center' });
+  
+        doc.setDrawColor(234, 88, 12);
+        doc.setLineWidth(0.8);
+        doc.line(marginL, 29, marginL + contentW, 29);
+  
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(40, 40, 40);
+        doc.text('PACKING SLIP', marginL, 38);
+  
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.4);
+        doc.line(marginL, 41, marginL + contentW, 41);
+  
+        const boxY = 46;
+        const boxH = 52;
+        const halfW = contentW / 2 - 4;
+  
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.rect(marginL, boxY, halfW, boxH);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(150, 150, 150);
+        doc.text('FROM', marginL + 4, boxY + 7);
+        doc.setFontSize(9);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Sree Palaniyappa Crackers', marginL + 4, boxY + 16);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        doc.text('Sivakasi, Tamil Nadu', marginL + 4, boxY + 24);
+        doc.text('+91 81242 59430', marginL + 4, boxY + 32);
+        doc.text('sreepalaniyappacrackers@gmail.com', marginL + 4, boxY + 40);
+  
+        const shipX = marginL + halfW + 8;
+        doc.rect(shipX, boxY, halfW, boxH);
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(150, 150, 150);
+        doc.text('SHIP TO', shipX + 4, boxY + 7);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(40, 40, 40);
+        doc.text(booking.customer_name || 'N/A', shipX + 4, boxY + 16, { width: halfW - 8 });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        let addr = booking.address || '';
+        if (addr.length > 40) addr = addr.substring(0, 37) + '…';
+        doc.text(addr, shipX + 4, boxY + 24, { width: halfW - 8 });
+        const distState = [booking.district, booking.state].filter(Boolean).join(', ');
+        doc.text(distState, shipX + 4, boxY + 32);
+        doc.text(`Mobile: ${booking.mobile_number || 'N/A'}`, shipX + 4, boxY + 40);
+  
+        const metaY = boxY + boxH + 8;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Order ID:`, marginL, metaY);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(40, 40, 40);
+        doc.text(booking.order_id || 'N/A', marginL + 20, metaY);
+  
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.4);
+        doc.line(marginL, metaY + 4, marginL + contentW, metaY + 4);
+  
+        let products = [];
+        try {
+          products = typeof booking.products === 'string' ? JSON.parse(booking.products) : (booking.products || []);
+        } catch { products = []; }
+  
+        const tableRows = products.map((p, i) => [i + 1, p.productname || 'N/A', p.quantity || 1]);
+  
+        autoTable(doc, {
+          startY: metaY + 10,
+          head: [['Sl.No', 'Product Name', 'Quantity']],
+          body: tableRows,
+          theme: 'grid',
+          styles: { 
+            fontSize: 12, 
+            cellPadding: 4,
+            fontStyle: 'bold'           // ← Made products & quantity bold
+          },
+          headStyles: { 
+            fillColor: [255, 255, 255], 
+            textColor: [40, 40, 40], 
+            fontStyle: 'bold', 
+            halign: 'center', 
+            lineColor: [200, 200, 200] 
+          },
+          columnStyles: { 
+            0: { cellWidth: 18, halign: 'center' }, 
+            1: { cellWidth: 'auto', halign: 'left' }, 
+            2: { cellWidth: 28, halign: 'center' } 
+          },
+          alternateRowStyles: { fillColor: [255, 247, 237] },
+        });
+  
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setDrawColor(234, 88, 12);
+        doc.setLineWidth(0.6);
+        doc.line(marginL, finalY, marginL + contentW, finalY);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(120, 120, 120);
+        doc.text('Thank you for your business with Sree Planiyappa Crackers, Sivakasi', pageW / 2, finalY + 7, { align: 'center' });
+  
+        const safeCustomerName = (booking.customer_name || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        doc.save(`${safeCustomerName}-${booking.order_id}-packing.pdf`);
+        toast.success("Packing slip downloaded!", { position: "top-center", autoClose: 5000 });
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to generate packing slip.", { position: "top-center", autoClose: 5000 });
+      }
+    };
 
   const handleDownloadClick = (booking) => {
     setDownloadTarget(booking);
